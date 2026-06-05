@@ -1,6 +1,6 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { ShoppingBag, Search, User as UserIcon, LogOut, LayoutDashboard, Package, Menu, X } from "lucide-react";
+import { ShoppingBag, Search, User as UserIcon, LogOut, LayoutDashboard, Package, Menu, X, Heart } from "lucide-react";
 import { useAuth, useCart } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,9 @@ export function ShopHeader() {
         </form>
 
         <div className="ml-auto flex items-center gap-1 md:ml-0">
+          <Link to="/favorites" className="hidden sm:inline-flex">
+            <Button variant="ghost" size="icon" aria-label="Favoritos"><Heart className="h-5 w-5" /></Button>
+          </Link>
           <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingBag className="h-5 w-5" />
@@ -121,8 +124,16 @@ export function ShopFooter() {
           <h4 className="mb-3 text-sm font-semibold">Loja</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/">Todos os produtos</Link></li>
+            <li><Link to="/favorites">Favoritos</Link></li>
             <li><Link to="/cart">Carrinho</Link></li>
             <li><Link to="/account">Minha conta</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="mb-3 text-sm font-semibold">Empresa</h4>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li><Link to="/about">Sobre</Link></li>
+            <li><Link to="/contact">Contato</Link></li>
           </ul>
         </div>
         <div>
