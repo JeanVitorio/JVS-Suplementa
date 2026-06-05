@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useAuth, useOrders } from "@/store";
+import { useEffect } from "react";
+import { useCustomers, useOrders } from "@/store";
 import { brl, formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/customers")({
@@ -7,8 +8,15 @@ export const Route = createFileRoute("/admin/customers")({
 });
 
 function CustomersPage() {
-  const users = useAuth((s) => s.users.filter(u => u.role === "client"));
+  const users = useCustomers((s) => s.customers);
+  const loadCustomers = useCustomers((s) => s.load);
   const orders = useOrders((s) => s.orders);
+  const loadOrders = useOrders((s) => s.load);
+
+  useEffect(() => {
+    loadCustomers();
+    loadOrders();
+  }, [loadCustomers, loadOrders]);
 
   return (
     <div className="space-y-6">
