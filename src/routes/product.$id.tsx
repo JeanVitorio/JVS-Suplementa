@@ -200,3 +200,5 @@ function ReviewsSection({ productId }: { productId: string }) {
       </div>
     </div>
   );
+}
+
