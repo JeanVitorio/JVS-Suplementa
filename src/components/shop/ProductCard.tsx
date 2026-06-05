@@ -1,13 +1,16 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Heart, Star } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { brl } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/store";
+import { useCart, useWishlist, useReviews } from "@/store";
 import { toast } from "sonner";
 
 export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
+  const toggleFav = useWishlist((s) => s.toggle);
+  const isFav = useWishlist((s) => s.ids.includes(product.id));
+  const rating = useReviews((s) => s.avg(product.id));
   const price = product.promo_price ?? product.price;
   const hasPromo = product.promo_price != null && product.promo_price < product.price;
   const off = hasPromo ? Math.round((1 - (product.promo_price as number) / product.price) * 100) : 0;
