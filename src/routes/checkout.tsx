@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShopHeader, ShopFooter } from "@/components/shop/ShopChrome";
-import { useAuth, useCart, useProducts, useSettings, checkout } from "@/store";
+import { useAuth, useCart, useProducts, useSettings, useCoupons, checkout } from "@/store";
 import { brl } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { CreditCard, QrCode } from "lucide-react";
+import { CreditCard, QrCode, Tag } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
@@ -59,31 +59,36 @@ function CheckoutPage() {
   }
 
   const subtotal = rows.reduce((s, r) => s + r.lineTotal, 0);
-  const shipping = subtotal >= settings.freeShippingAbove ? 0 : settings.shippingFlat;
-  const total = subtotal + shipping;
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const validateCoupon = useCoupons((s) => s.validate);
+  const discount = appliedCoupon?.discount ?? 0;
+  const shipping = subtotal - discount >= settings.freeShippingAbove ? 0 : settings.shippingFlat;
+  const total = Math.max(0, subtotal - discount + shipping);
+
+  const applyCoupon = () => {
+    const res = validateCoupon(couponInput, subtotal);
+    if (!res.ok) return toast.error(res.error);
+    setAppliedCoupon({ code: res.coupon.code, discount: res.discount });
+    toast.success(`Cupom ${res.coupon.code} aplicado`);
+  };
 
   const submit = async () => {
     if (!form.name || !form.cep || !form.street || !form.number || !form.city || !form.state || !form.phone) {
-      toast.error("Preencha o endereço completo");
-      return;
+      toast.error("Preencha o endereço completo"); return;
     }
     if (method === "card" && (!card.number || !card.name || !card.exp || !card.cvv)) {
-      toast.error("Preencha os dados do cartão");
-      return;
+      toast.error("Preencha os dados do cartão"); return;
     }
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 800));
     const res = checkout({
-      userId: user.id,
-      userEmail: user.email,
-      address: { ...form },
-      paymentMethod: method,
+      userId: user.id, userEmail: user.email,
+      address: { ...form }, paymentMethod: method,
+      couponCode: appliedCoupon?.code,
     });
     setSubmitting(false);
-    if (!res.ok) {
-      toast.error(res.error);
-      return;
-    }
+    if (!res.ok) { toast.error(res.error); return; }
     toast.success("Pedido criado!");
     router.navigate({ to: "/checkout/success", search: { id: res.order.id } as never });
   };
@@ -164,7 +169,16 @@ function CheckoutPage() {
                 </div>
               ))}
               <div className="my-3 border-t" />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Cupom" className="pl-9 h-9" />
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={applyCoupon}>Aplicar</Button>
+              </div>
+              <div className="my-3 border-t" />
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{brl(subtotal)}</span></div>
+              {discount > 0 && <div className="flex justify-between text-success"><span>Desconto ({appliedCoupon?.code})</span><span>-{brl(discount)}</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Frete</span><span>{shipping === 0 ? "Grátis" : brl(shipping)}</span></div>
               <div className="flex justify-between text-base font-semibold pt-1"><span>Total</span><span>{brl(total)}</span></div>
             </div>

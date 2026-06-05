@@ -4,7 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  password: string; // mock only
+  password: string;
   role: Role;
   createdAt: string;
 }
@@ -67,11 +67,14 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   shipping: number;
+  discount?: number;
+  couponCode?: string;
   total: number;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   address: Address;
   pixCode?: string;
+  trackingCode?: string;
   createdAt: string;
 }
 
@@ -86,4 +89,25 @@ export interface Settings {
   freeShippingAbove: number;
   whatsapp: string;
   email: string;
+}
+
+export interface Review {
+  id: string;
+  productId: string;
+  userId: string;
+  userName: string;
+  rating: number; // 1..5
+  comment: string;
+  createdAt: string;
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  type: "percent" | "fixed";
+  value: number;
+  minSubtotal?: number;
+  active: boolean;
+  expiresAt?: string | null;
+  createdAt: string;
 }

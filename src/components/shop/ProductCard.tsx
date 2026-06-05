@@ -1,13 +1,16 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Heart, Star } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { brl } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/store";
+import { useCart, useWishlist, useReviews } from "@/store";
 import { toast } from "sonner";
 
 export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
+  const toggleFav = useWishlist((s) => s.toggle);
+  const isFav = useWishlist((s) => s.ids.includes(product.id));
+  const rating = useReviews((s) => s.avg(product.id));
   const price = product.promo_price ?? product.price;
   const hasPromo = product.promo_price != null && product.promo_price < product.price;
   const off = hasPromo ? Math.round((1 - (product.promo_price as number) / product.price) * 100) : 0;
@@ -32,9 +35,21 @@ export function ProductCard({ product }: { product: Product }) {
             Esgotado
           </span>
         )}
+        <button
+          onClick={(e) => { e.preventDefault(); toggleFav(product.id); toast.success(isFav ? "Removido dos favoritos" : "Adicionado aos favoritos"); }}
+          aria-label="Favoritar"
+          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-background/80 backdrop-blur transition hover:bg-background"
+        >
+          <Heart className={`h-4 w-4 ${isFav ? "fill-destructive text-destructive" : "text-foreground"}`} />
+        </button>
       </Link>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className="text-xs text-muted-foreground">{product.category}</div>
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>{product.category}</span>
+          {rating.count > 0 && (
+            <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-warning text-warning" /> {rating.score.toFixed(1)} <span className="opacity-60">({rating.count})</span></span>
+          )}
+        </div>
         <Link to="/product/$id" params={{ id: product.id }} className="line-clamp-2 text-sm font-medium hover:underline">
           {product.name}
         </Link>
