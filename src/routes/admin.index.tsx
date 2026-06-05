@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useOrders, useProducts, useAuth } from "@/store";
+import { useEffect } from "react";
+import { useOrders, useProducts, useCustomers } from "@/store";
 import { brl, formatDate } from "@/lib/format";
 import { ShoppingCart, Package, DollarSign, Users, TrendingUp, AlertTriangle } from "lucide-react";
 
@@ -9,14 +10,21 @@ export const Route = createFileRoute("/admin/")({
 
 function Dashboard() {
   const orders = useOrders((s) => s.orders);
+  const loadOrders = useOrders((s) => s.load);
   const products = useProducts((s) => s.products);
-  const users = useAuth((s) => s.users);
+  const users = useCustomers((s) => s.customers);
+  const loadCustomers = useCustomers((s) => s.load);
+
+  useEffect(() => {
+    loadOrders();
+    loadCustomers();
+  }, [loadOrders, loadCustomers]);
 
   const revenue = orders.filter(o => o.status !== "cancelado").reduce((s, o) => s + o.total, 0);
   const pending = orders.filter(o => o.status === "aguardando_pagamento").length;
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= 5);
   const out = products.filter(p => p.stock === 0);
-  const clients = users.filter(u => u.role === "client").length;
+  const clients = users.length;
 
   const stats = [
     { label: "Faturamento", value: brl(revenue), icon: DollarSign, sub: `${orders.length} pedidos` },

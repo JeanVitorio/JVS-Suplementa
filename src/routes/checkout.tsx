@@ -82,7 +82,7 @@ function CheckoutPage() {
     }
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 800));
-    const res = checkout({
+    const res = await checkout({
       userId: user.id, userEmail: user.email,
       address: { ...form }, paymentMethod: method,
       couponCode: appliedCoupon?.code,

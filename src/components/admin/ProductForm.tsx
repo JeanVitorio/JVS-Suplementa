@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { categories } from "@/lib/mock-data";
+import { useCategories } from "@/store";
 import type { Product } from "@/lib/types";
 import { Plus, X } from "lucide-react";
 
 type Form = Omit<Product, "id" | "createdAt">;
 
 export function ProductForm({ initial, onSubmit }: { initial?: Product; onSubmit: (data: Form) => void }) {
+  const categories = useCategories((s) => s.categories);
   const [f, setF] = useState<Form>({
     name: initial?.name ?? "",
     description: initial?.description ?? "",
@@ -17,7 +18,7 @@ export function ProductForm({ initial, onSubmit }: { initial?: Product; onSubmit
     promo_price: initial?.promo_price ?? null,
     stock: initial?.stock ?? 0,
     images: initial?.images ?? [],
-    category: initial?.category ?? categories[0],
+    category: initial?.category ?? categories[0] ?? "",
     sku: initial?.sku ?? "",
     active: initial?.active ?? true,
     featured: initial?.featured ?? false,

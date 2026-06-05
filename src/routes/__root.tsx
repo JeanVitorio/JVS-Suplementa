@@ -12,6 +12,14 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "../components/ui/sonner";
+import {
+  useAuth,
+  useProducts,
+  useCoupons,
+  useReviews,
+  useSettings,
+  useCategories,
+} from "@/store";
 
 function NotFoundComponent() {
   return (
@@ -117,6 +125,16 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    // Bootstrap: carrega dados do Supabase uma vez.
+    useAuth.getState().init();
+    useProducts.getState().load();
+    useCoupons.getState().load();
+    useReviews.getState().load();
+    useSettings.getState().load();
+    useCategories.getState().load();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
