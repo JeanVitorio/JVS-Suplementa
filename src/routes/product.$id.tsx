@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShopHeader, ShopFooter } from "@/components/shop/ShopChrome";
-import { useProducts, useCart, useAuth, useReviews, useWishlist } from "@/store";
+import { useProducts, useCart, useAuth, useReviews } from "@/store";
 import { brl } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Minus, Plus, ShieldCheck, Truck, RotateCcw, ChevronLeft, Heart, Star } from "lucide-react";
+import { Minus, Plus, ShieldCheck, Truck, RotateCcw, ChevronLeft, Star } from "lucide-react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/shop/ProductCard";
 
