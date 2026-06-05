@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShopHeader, ShopFooter } from "@/components/shop/ShopChrome";
-import { useProducts, useCart, useAuth } from "@/store";
+import { useProducts, useCart, useAuth, useReviews, useWishlist } from "@/store";
 import { brl } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, ShieldCheck, Truck, RotateCcw, ChevronLeft } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Minus, Plus, ShieldCheck, Truck, RotateCcw, ChevronLeft, Heart, Star } from "lucide-react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/shop/ProductCard";
 
@@ -126,6 +127,8 @@ function ProductPage() {
           </div>
         </div>
 
+        <ReviewsSection productId={product.id} />
+
         <div className="mt-16">
           <h2 className="mb-4 text-xl font-bold">Você também pode gostar</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -137,3 +140,66 @@ function ProductPage() {
     </div>
   );
 }
+
+function ReviewsSection({ productId }: { productId: string }) {
+  const user = useAuth((s) => s.current());
+  const reviews = useReviews((s) => s.reviews.filter((r) => r.productId === productId));
+  const addReview = useReviews((s) => s.add);
+  const avg = useReviews((s) => s.avg(productId));
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+
+  return (
+    <div className="mt-16 grid gap-8 md:grid-cols-[1fr_2fr]">
+      <div>
+        <h2 className="text-xl font-bold">Avaliações</h2>
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex">{Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} className={`h-5 w-5 ${i < Math.round(avg.score) ? "fill-warning text-warning" : "text-muted-foreground"}`} />
+          ))}</div>
+          <span className="text-sm font-medium">{avg.count > 0 ? avg.score.toFixed(1) : "—"}</span>
+          <span className="text-sm text-muted-foreground">({avg.count})</span>
+        </div>
+        {user ? (
+          <form
+            className="mt-4 space-y-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!comment.trim()) return toast.error("Escreva um comentário");
+              addReview({ productId, userId: user.id, userName: user.name, rating, comment });
+              setComment(""); setRating(5);
+              toast.success("Avaliação enviada");
+            }}
+          >
+            <div className="flex gap-1">{Array.from({ length: 5 }).map((_, i) => (
+              <button type="button" key={i} onClick={() => setRating(i + 1)}>
+                <Star className={`h-6 w-6 ${i < rating ? "fill-warning text-warning" : "text-muted-foreground"}`} />
+              </button>
+            ))}</div>
+            <Textarea rows={3} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Conte sua experiência..." />
+            <Button type="submit" size="sm">Publicar</Button>
+          </form>
+        ) : (
+          <p className="mt-3 text-sm text-muted-foreground"><Link to="/auth" className="underline">Entre</Link> para avaliar.</p>
+        )}
+      </div>
+      <div className="space-y-3">
+        {reviews.length === 0 && <div className="rounded-xl border bg-muted/30 p-6 text-sm text-muted-foreground">Seja o primeiro a avaliar.</div>}
+        {reviews.map((r) => (
+          <div key={r.id} className="rounded-xl border bg-card p-4">
+            <div className="flex items-center gap-2">
+              <div className="flex">{Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className={`h-4 w-4 ${i < r.rating ? "fill-warning text-warning" : "text-muted-foreground"}`} />
+              ))}</div>
+              <span className="text-sm font-medium">{r.userName}</span>
+              <span className="text-xs text-muted-foreground">· {new Date(r.createdAt).toLocaleDateString("pt-BR")}</span>
+            </div>
+            <p className="mt-1 text-sm text-foreground/80">{r.comment}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _u = { Heart, useWishlist };
