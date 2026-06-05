@@ -1,4 +1,15 @@
-import type { Product, Settings, User } from "./types";
+import type { Coupon, Product, Review, Settings, User } from "./types";
+
+export const defaultReviews: Review[] = [
+  { id: "r_1", productId: "p_001", userId: "u_demo", userName: "Cliente Demo", rating: 5, comment: "Som incrível, vale cada centavo.", createdAt: new Date().toISOString() },
+  { id: "r_2", productId: "p_001", userId: "u_demo", userName: "Lara M.", rating: 4, comment: "Cancelamento de ruído excelente.", createdAt: new Date().toISOString() },
+  { id: "r_3", productId: "p_007", userId: "u_demo", userName: "Pedro A.", rating: 5, comment: "Bateria dura mesmo 14 dias.", createdAt: new Date().toISOString() },
+];
+
+export const defaultCoupons: Coupon[] = [
+  { id: "c_1", code: "BEMVINDO10", type: "percent", value: 10, minSubtotal: 100, active: true, expiresAt: null, createdAt: new Date().toISOString() },
+  { id: "c_2", code: "FRETE50", type: "fixed", value: 50, minSubtotal: 200, active: true, expiresAt: null, createdAt: new Date().toISOString() },
+];
 
 const img = (seed: string, w = 800, h = 800) =>
   `https://picsum.photos/seed/${seed}/${w}/${h}`;
