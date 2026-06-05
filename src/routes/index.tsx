@@ -2,8 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ShopHeader, ShopFooter } from "@/components/shop/ShopChrome";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { useProducts } from "@/store";
-import { categories } from "@/lib/mock-data";
+import { useProducts, useCategories } from "@/store";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal, Truck, ShieldCheck, CreditCard, RotateCcw } from "lucide-react";
@@ -16,6 +15,7 @@ export const Route = createFileRoute("/")({
 function ShopHome() {
   const { q } = Route.useSearch();
   const products = useProducts((s) => s.products);
+  const categories = useCategories((s) => s.categories);
   const [query, setQuery] = useState(q ?? "");
   const [cat, setCat] = useState<string | null>(null);
   const [sort, setSort] = useState("relevance");
