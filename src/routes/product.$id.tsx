@@ -200,6 +200,3 @@ function ReviewsSection({ productId }: { productId: string }) {
       </div>
     </div>
   );
-}
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _u = { Heart, useWishlist };
