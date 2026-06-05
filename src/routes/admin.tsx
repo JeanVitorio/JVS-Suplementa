@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/store";
-import { LayoutDashboard, Package, Boxes, ShoppingCart, Users, Settings as SettingsIcon, LogOut, Store } from "lucide-react";
+import { LayoutDashboard, Package, Boxes, ShoppingCart, Users, Settings as SettingsIcon, LogOut, Store, Tag, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -14,6 +14,8 @@ const NAV = [
   { to: "/admin/stock", label: "Estoque", icon: Boxes },
   { to: "/admin/orders", label: "Pedidos", icon: ShoppingCart },
   { to: "/admin/customers", label: "Clientes", icon: Users },
+  { to: "/admin/coupons", label: "Cupons", icon: Tag },
+  { to: "/admin/reviews", label: "Avaliações", icon: MessageSquare },
   { to: "/admin/settings", label: "Configurações", icon: SettingsIcon },
 ];
 
