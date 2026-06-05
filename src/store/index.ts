@@ -12,8 +12,15 @@ import type {
   Settings,
   User,
 } from "@/lib/types";
-import { defaultProducts, defaultSettings, defaultUsers, defaultReviews, defaultCoupons } from "@/lib/mock-data";
+import {
+  defaultProducts,
+  defaultSettings,
+  defaultUsers,
+  defaultReviews,
+  defaultCoupons,
+} from "@/lib/mock-data";
 import { uid } from "@/lib/format";
+import { supabase } from "@/lib/supabase";
 
 /* ---------------- Auth ---------------- */
 interface AuthState {
@@ -36,31 +43,47 @@ export const useAuth = create<AuthState>()(
       },
       login: (email, password) => {
         const u = get().users.find(
-          (x) => x.email.toLowerCase() === email.toLowerCase() && x.password === password,
+          (x) =>
+            x.email.toLowerCase() === email.toLowerCase() &&
+            x.password === password
         );
         if (!u) return { ok: false, error: "E-mail ou senha inválidos." };
         set({ currentUserId: u.id });
         return { ok: true };
       },
       register: ({ name, email, password }) => {
-        if (get().users.some((u) => u.email.toLowerCase() === email.toLowerCase()))
+        if (
+          get()
+            .users.some(
+              (u) => u.email.toLowerCase() === email.toLowerCase()
+            )
+        )
           return { ok: false, error: "E-mail já cadastrado." };
         const user: User = {
-          id: "u_" + uid(), name, email, password, role: "client",
+          id: "u_" + uid(),
+          name,
+          email,
+          password,
+          role: "client",
           createdAt: new Date().toISOString(),
         };
-        set({ users: [...get().users, user], currentUserId: user.id });
+        set({
+          users: [...get().users, user],
+          currentUserId: user.id,
+        });
         return { ok: true };
       },
       logout: () => set({ currentUserId: null }),
     }),
-    { name: "bsh-auth" },
-  ),
+    { name: "bsh-auth" }
+  )
 );
 
-/* ---------------- Products ---------------- */
+/* ---------------- Products (FIXED) ---------------- */
 interface ProductState {
   products: Product[];
+  loading: boolean;
+  loadFromDB: () => Promise<void>;
   add: (p: Omit<Product, "id" | "createdAt">) => Product;
   update: (id: string, patch: Partial<Product>) => void;
   remove: (id: string) => void;
@@ -72,24 +95,80 @@ interface ProductState {
 export const useProducts = create<ProductState>()(
   persist(
     (set, get) => ({
-      products: defaultProducts,
+      products: [],
+      loading: false,
+
+      loadFromDB: async () => {
+        set({ loading: true });
+
+        try {
+          const { data, error } = await supabase
+            .from("products")
+            .select("*");
+
+          if (error) {
+            console.error("Supabase error:", error);
+            set({ products: defaultProducts });
+          } else {
+            set({ products: data ?? [] });
+          }
+        } catch (err) {
+          console.error("Unexpected error:", err);
+          set({ products: defaultProducts });
+        } finally {
+          set({ loading: false });
+        }
+      },
+
       add: (p) => {
-        const product: Product = { ...p, id: "p_" + uid(), createdAt: new Date().toISOString() };
+        const product: Product = {
+          ...p,
+          id: "p_" + uid(),
+          createdAt: new Date().toISOString(),
+        };
         set({ products: [product, ...get().products] });
         return product;
       },
-      update: (id, patch) => set({ products: get().products.map((p) => (p.id === id ? { ...p, ...patch } : p)) }),
-      remove: (id) => set({ products: get().products.filter((p) => p.id !== id) }),
-      adjustStock: (id, delta) => set({
-        products: get().products.map((p) => p.id === id ? { ...p, stock: Math.max(0, p.stock + delta) } : p),
-      }),
-      setStock: (id, n) => set({
-        products: get().products.map((p) => p.id === id ? { ...p, stock: Math.max(0, Math.floor(n)) } : p),
-      }),
+
+      update: (id, patch) =>
+        set({
+          products: get().products.map((p) =>
+            p.id === id ? { ...p, ...patch } : p
+          ),
+        }),
+
+      remove: (id) =>
+        set({
+          products: get().products.filter((p) => p.id !== id),
+        }),
+
+      adjustStock: (id, delta) =>
+        set({
+          products: get().products.map((p) =>
+            p.id === id
+              ? { ...p, stock: Math.max(0, p.stock + delta) }
+              : p
+          ),
+        }),
+
+      setStock: (id, n) =>
+        set({
+          products: get().products.map((p) =>
+            p.id === id
+              ? { ...p, stock: Math.max(0, Math.floor(n)) }
+              : p
+          ),
+        }),
+
       get: (id) => get().products.find((p) => p.id === id),
     }),
-    { name: "bsh-products" },
-  ),
+    {
+      name: "bsh-products",
+      partialize: (state) => ({
+        products: state.products,
+      }),
+    }
+  )
 );
 
 /* ---------------- Cart ---------------- */
@@ -108,22 +187,39 @@ export const useCart = create<CartState>()(
       items: [],
       add: (productId, qty = 1) => {
         const existing = get().items.find((i) => i.productId === productId);
-        if (existing) set({
-          items: get().items.map((i) => i.productId === productId ? { ...i, quantity: i.quantity + qty } : i),
-        });
-        else set({ items: [...get().items, { productId, quantity: qty }] });
+        if (existing)
+          set({
+            items: get().items.map((i) =>
+              i.productId === productId
+                ? { ...i, quantity: i.quantity + qty }
+                : i
+            ),
+          });
+        else
+          set({
+            items: [...get().items, { productId, quantity: qty }],
+          });
       },
-      remove: (productId) => set({ items: get().items.filter((i) => i.productId !== productId) }),
-      setQty: (productId, qty) => set({
-        items: qty <= 0
-          ? get().items.filter((i) => i.productId !== productId)
-          : get().items.map((i) => i.productId === productId ? { ...i, quantity: qty } : i),
-      }),
+      remove: (productId) =>
+        set({
+          items: get().items.filter((i) => i.productId !== productId),
+        }),
+      setQty: (productId, qty) =>
+        set({
+          items:
+            qty <= 0
+              ? get().items.filter((i) => i.productId !== productId)
+              : get().items.map((i) =>
+                  i.productId === productId
+                    ? { ...i, quantity: qty }
+                    : i
+                ),
+        }),
       clear: () => set({ items: [] }),
       count: () => get().items.reduce((s, i) => s + i.quantity, 0),
     }),
-    { name: "bsh-cart" },
-  ),
+    { name: "bsh-cart" }
+  )
 );
 
 /* ---------------- Wishlist ---------------- */
@@ -138,16 +234,17 @@ export const useWishlist = create<WishlistState>()(
   persist(
     (set, get) => ({
       ids: [],
-      toggle: (productId) => set({
-        ids: get().ids.includes(productId)
-          ? get().ids.filter((x) => x !== productId)
-          : [...get().ids, productId],
-      }),
+      toggle: (productId) =>
+        set({
+          ids: get().ids.includes(productId)
+            ? get().ids.filter((x) => x !== productId)
+            : [...get().ids, productId],
+        }),
       has: (productId) => get().ids.includes(productId),
       clear: () => set({ ids: [] }),
     }),
-    { name: "bsh-wishlist" },
-  ),
+    { name: "bsh-wishlist" }
+  )
 );
 
 /* ---------------- Reviews ---------------- */
@@ -164,20 +261,30 @@ export const useReviews = create<ReviewState>()(
     (set, get) => ({
       reviews: defaultReviews,
       add: (r) => {
-        const review: Review = { ...r, id: "r_" + uid(), createdAt: new Date().toISOString() };
+        const review: Review = {
+          ...r,
+          id: "r_" + uid(),
+          createdAt: new Date().toISOString(),
+        };
         set({ reviews: [review, ...get().reviews] });
         return review;
       },
-      remove: (id) => set({ reviews: get().reviews.filter((r) => r.id !== id) }),
-      byProduct: (productId) => get().reviews.filter((r) => r.productId === productId),
+      remove: (id) =>
+        set({ reviews: get().reviews.filter((r) => r.id !== id) }),
+      byProduct: (productId) =>
+        get().reviews.filter((r) => r.productId === productId),
       avg: (productId) => {
         const list = get().reviews.filter((r) => r.productId === productId);
         if (!list.length) return { score: 0, count: 0 };
-        return { score: list.reduce((s, r) => s + r.rating, 0) / list.length, count: list.length };
+        return {
+          score:
+            list.reduce((s, r) => s + r.rating, 0) / list.length,
+          count: list.length,
+        };
       },
     }),
-    { name: "bsh-reviews" },
-  ),
+    { name: "bsh-reviews" }
+  )
 );
 
 /* ---------------- Coupons ---------------- */
@@ -186,7 +293,12 @@ interface CouponState {
   add: (c: Omit<Coupon, "id" | "createdAt">) => Coupon;
   update: (id: string, patch: Partial<Coupon>) => void;
   remove: (id: string) => void;
-  validate: (code: string, subtotal: number) => { ok: true; coupon: Coupon; discount: number } | { ok: false; error: string };
+  validate: (
+    code: string,
+    subtotal: number
+  ) =>
+    | { ok: true; coupon: Coupon; discount: number }
+    | { ok: false; error: string };
 }
 
 export const useCoupons = create<CouponState>()(
@@ -194,27 +306,46 @@ export const useCoupons = create<CouponState>()(
     (set, get) => ({
       coupons: defaultCoupons,
       add: (c) => {
-        const coupon: Coupon = { ...c, id: "c_" + uid(), createdAt: new Date().toISOString() };
+        const coupon: Coupon = {
+          ...c,
+          id: "c_" + uid(),
+          createdAt: new Date().toISOString(),
+        };
         set({ coupons: [coupon, ...get().coupons] });
         return coupon;
       },
-      update: (id, patch) => set({ coupons: get().coupons.map((c) => c.id === id ? { ...c, ...patch } : c) }),
-      remove: (id) => set({ coupons: get().coupons.filter((c) => c.id !== id) }),
+      update: (id, patch) =>
+        set({
+          coupons: get().coupons.map((c) =>
+            c.id === id ? { ...c, ...patch } : c
+          ),
+        }),
+      remove: (id) =>
+        set({
+          coupons: get().coupons.filter((c) => c.id !== id),
+        }),
       validate: (code, subtotal) => {
-        const c = get().coupons.find((x) => x.code.toLowerCase() === code.toLowerCase());
+        const c = get().coupons.find(
+          (x) => x.code.toLowerCase() === code.toLowerCase()
+        );
         if (!c) return { ok: false, error: "Cupom inválido." };
         if (!c.active) return { ok: false, error: "Cupom inativo." };
-        if (c.expiresAt && new Date(c.expiresAt) < new Date()) return { ok: false, error: "Cupom expirado." };
+        if (c.expiresAt && new Date(c.expiresAt) < new Date())
+          return { ok: false, error: "Cupom expirado." };
         if (c.minSubtotal && subtotal < c.minSubtotal)
-          return { ok: false, error: `Pedido mínimo de R$ ${c.minSubtotal.toFixed(2)}.` };
-        const discount = c.type === "percent"
-          ? Math.min(subtotal, subtotal * (c.value / 100))
-          : Math.min(subtotal, c.value);
+          return {
+            ok: false,
+            error: `Pedido mínimo de R$ ${c.minSubtotal.toFixed(2)}.`,
+          };
+        const discount =
+          c.type === "percent"
+            ? Math.min(subtotal, subtotal * (c.value / 100))
+            : Math.min(subtotal, c.value);
         return { ok: true, coupon: c, discount };
       },
     }),
-    { name: "bsh-coupons" },
-  ),
+    { name: "bsh-coupons" }
+  )
 );
 
 /* ---------------- Orders ---------------- */
@@ -232,17 +363,32 @@ export const useOrders = create<OrderState>()(
     (set, get) => ({
       orders: [],
       create: (o) => {
-        const order: Order = { ...o, id: "o_" + uid(), createdAt: new Date().toISOString() };
+        const order: Order = {
+          ...o,
+          id: "o_" + uid(),
+          createdAt: new Date().toISOString(),
+        };
         set({ orders: [order, ...get().orders] });
         return order;
       },
-      setStatus: (id, status) => set({ orders: get().orders.map((o) => o.id === id ? { ...o, status } : o) }),
-      setTracking: (id, code) => set({ orders: get().orders.map((o) => o.id === id ? { ...o, trackingCode: code } : o) }),
-      byUser: (userId) => get().orders.filter((o) => o.userId === userId),
+      setStatus: (id, status) =>
+        set({
+          orders: get().orders.map((o) =>
+            o.id === id ? { ...o, status } : o
+          ),
+        }),
+      setTracking: (id, code) =>
+        set({
+          orders: get().orders.map((o) =>
+            o.id === id ? { ...o, trackingCode: code } : o
+          ),
+        }),
+      byUser: (userId) =>
+        get().orders.filter((o) => o.userId === userId),
       get: (id) => get().orders.find((o) => o.id === id),
     }),
-    { name: "bsh-orders" },
-  ),
+    { name: "bsh-orders" }
+  )
 );
 
 /* ---------------- Settings ---------------- */
@@ -255,62 +401,95 @@ export const useSettings = create<SettingsState>()(
   persist(
     (set, get) => ({
       settings: defaultSettings,
-      update: (patch) => set({ settings: { ...get().settings, ...patch } }),
+      update: (patch) =>
+        set({ settings: { ...get().settings, ...patch } }),
     }),
-    { name: "bsh-settings" },
-  ),
+    { name: "bsh-settings" }
+  )
 );
 
-/* ---------------- Helpers ---------------- */
+/* ---------------- Checkout ---------------- */
 export function checkout(params: {
   userId: string;
   userEmail: string;
   address: Address;
   paymentMethod: PaymentMethod;
   couponCode?: string;
-}): { ok: true; order: Order } | { ok: false; error: string } {
+}) {
   const cart = useCart.getState();
   const products = useProducts.getState();
   const settings = useSettings.getState().settings;
 
-  if (cart.items.length === 0) return { ok: false, error: "Carrinho vazio." };
+  if (cart.items.length === 0)
+    return { ok: false, error: "Carrinho vazio." };
 
   for (const i of cart.items) {
     const p = products.get(i.productId);
-    if (!p || !p.active) return { ok: false, error: `Produto indisponível.` };
-    if (p.stock < i.quantity) return { ok: false, error: `Estoque insuficiente para ${p.name}.` };
+    if (!p || !p.active)
+      return { ok: false, error: "Produto indisponível." };
+    if (p.stock < i.quantity)
+      return {
+        ok: false,
+        error: `Estoque insuficiente para ${p.name}.`,
+      };
   }
 
   const items = cart.items.map((i) => {
     const p = products.get(i.productId)!;
     const price = p.promo_price ?? p.price;
-    return { id: "oi_" + uid(), productId: p.id, name: p.name, quantity: i.quantity, price, image: p.images[0] };
+    return {
+      id: "oi_" + uid(),
+      productId: p.id,
+      name: p.name,
+      quantity: i.quantity,
+      price,
+      image: p.images[0],
+    };
   });
 
-  const subtotal = items.reduce((s, it) => s + it.price * it.quantity, 0);
+  const subtotal = items.reduce(
+    (s, it) => s + it.price * it.quantity,
+    0
+  );
+
   let discount = 0;
   let couponCode: string | undefined;
+
   if (params.couponCode) {
-    const v = useCoupons.getState().validate(params.couponCode, subtotal);
-    if (v.ok) { discount = v.discount; couponCode = v.coupon.code; }
+    const v = useCoupons
+      .getState()
+      .validate(params.couponCode, subtotal);
+    if (v.ok) {
+      discount = v.discount;
+      couponCode = v.coupon.code;
+    }
   }
-  const shipping = subtotal - discount >= settings.freeShippingAbove ? 0 : settings.shippingFlat;
+
+  const shipping =
+    subtotal - discount >= settings.freeShippingAbove
+      ? 0
+      : settings.shippingFlat;
+
   const total = Math.max(0, subtotal - discount + shipping);
 
-  for (const i of cart.items) products.adjustStock(i.productId, -i.quantity);
-
-  const pixCode = params.paymentMethod === "pix"
-    ? `00020126360014BR.GOV.BCB.PIX0114${settings.pix_key}5204000053039865802BR5913${settings.pix_holder.slice(0, 13)}6009SAO PAULO62${total.toFixed(2)}6304ABCD`
-    : undefined;
+  for (const i of cart.items)
+    products.adjustStock(i.productId, -i.quantity);
 
   const order = useOrders.getState().create({
     userId: params.userId,
     userEmail: params.userEmail,
-    items, subtotal, shipping, discount, couponCode, total,
-    status: params.paymentMethod === "pix" ? "aguardando_pagamento" : "pago",
+    items,
+    subtotal,
+    shipping,
+    discount,
+    couponCode,
+    total,
+    status:
+      params.paymentMethod === "pix"
+        ? "aguardando_pagamento"
+        : "pago",
     paymentMethod: params.paymentMethod,
     address: params.address,
-    pixCode,
   });
 
   cart.clear();
