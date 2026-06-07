@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useAuth } from "@/store";
+import { useAuth, useSettings } from "@/store";
 import { LayoutDashboard, Package, Boxes, ShoppingCart, Users, Settings as SettingsIcon, LogOut, Store, Tag, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +25,7 @@ function AdminLayout() {
   const user = useAuth((s) => s.current());
   const initialized = useAuth((s) => s.initialized);
   const logout = useAuth((s) => s.logout);
+  const settings = useSettings((s) => s.settings);
 
   useEffect(() => {
     if (!initialized) return;
@@ -39,9 +40,15 @@ function AdminLayout() {
     <div className="min-h-screen bg-muted/30">
       <aside className="fixed inset-y-0 left-0 hidden w-60 border-r bg-sidebar p-4 md:block">
         <Link to="/admin" className="mb-6 flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground font-bold">B</div>
+          {settings.logoUrl ? (
+            <img src={settings.logoUrl} alt={settings.storeName || "Logo da loja"} className="h-8 w-8 rounded-md object-cover" />
+          ) : (
+            <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground font-bold">
+              {(settings.storeName || "B").slice(0, 1).toUpperCase()}
+            </div>
+          )}
           <div>
-            <div className="text-sm font-semibold leading-tight">Bertolleti</div>
+            <div className="text-sm font-semibold leading-tight">{settings.storeName || "Bertolleti"}</div>
             <div className="text-xs text-muted-foreground">Painel Admin</div>
           </div>
         </Link>
