@@ -23,13 +23,16 @@ function AdminLayout() {
   const router = useRouter();
   const loc = useLocation();
   const user = useAuth((s) => s.current());
+  const initialized = useAuth((s) => s.initialized);
   const logout = useAuth((s) => s.logout);
 
   useEffect(() => {
+    if (!initialized) return;
     if (!user) router.navigate({ to: "/auth", search: { redirect: "/admin" } as never });
     else if (user.role !== "admin") router.navigate({ to: "/" });
-  }, [user, router]);
+  }, [user, router, initialized]);
 
+  if (!initialized) return null;
   if (!user || user.role !== "admin") return null;
 
   return (

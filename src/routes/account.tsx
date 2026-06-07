@@ -21,13 +21,15 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 function AccountPage() {
   const router = useRouter();
   const user = useAuth((s) => s.current());
+  const initialized = useAuth((s) => s.initialized);
   const orders = useOrders((s) => (user ? s.orders.filter((o) => o.userId === user.id) : []));
 
   useEffect(() => {
+    if (!initialized) return;
     if (!user) router.navigate({ to: "/auth", search: { redirect: "/account" } as never });
-  }, [user, router]);
+  }, [user, router, initialized]);
 
-  if (!user) return null;
+  if (!initialized || !user) return null;
 
   return (
     <div className="min-h-screen">

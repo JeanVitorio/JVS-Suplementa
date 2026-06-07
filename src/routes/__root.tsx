@@ -125,6 +125,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const initialized = useAuth((s) => s.initialized);
 
   useEffect(() => {
     // Bootstrap: carrega dados do Supabase uma vez.
@@ -138,7 +139,16 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      {initialized ? (
+        <Outlet />
+      ) : (
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-3 text-muted-foreground">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
+            <span className="text-sm">Carregando…</span>
+          </div>
+        </div>
+      )}
       <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );
