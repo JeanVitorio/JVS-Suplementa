@@ -31,9 +31,23 @@ function SettingsPage() {
 
       <Section title="Loja">
         <Field label="Nome da loja" v={f.storeName} on={(v) => setF({ ...f, storeName: v })} />
+        <Field label="URL da logo" v={f.logoUrl} on={(v) => setF({ ...f, logoUrl: v })} />
         <div className="sm:col-span-2">
           <Label>Descrição</Label>
           <Textarea value={f.storeDescription} onChange={(e) => setF({ ...f, storeDescription: e.target.value })} rows={3} className="mt-1" />
+        </div>
+        <div className="sm:col-span-2">
+          <Label>Pré-visualização da logo</Label>
+          <div className="mt-2 flex items-center gap-3 rounded-xl border bg-muted/20 p-4">
+            {f.logoUrl ? (
+              <img src={f.logoUrl} alt={f.storeName || "Logo da loja"} className="h-14 w-14 rounded-lg object-cover" />
+            ) : (
+              <div className="grid h-14 w-14 place-items-center rounded-lg bg-primary text-lg font-bold text-primary-foreground">
+                {(f.storeName || "B").slice(0, 1).toUpperCase()}
+              </div>
+            )}
+            <p className="text-sm text-muted-foreground">Cole a URL da imagem da sua logo para substituir o ícone padrão no cabeçalho e no painel.</p>
+          </div>
         </div>
         <Field label="WhatsApp" v={f.whatsapp} on={(v) => setF({ ...f, whatsapp: v })} />
         <Field label="E-mail de contato" v={f.email} on={(v) => setF({ ...f, email: v })} />
