@@ -80,6 +80,7 @@ export interface Order {
 export interface Settings {
   storeName: string;
   storeDescription: string;
+  logoUrl: string;
   pix_key: string;
   pix_holder: string;
   stripe_public_key: string;

@@ -99,6 +99,7 @@ function mapSettings(row: any): Settings {
   return {
     storeName: row.store_name ?? "",
     storeDescription: row.store_description ?? "",
+    logoUrl: row.logo_url ?? "",
     pix_key: row.pix_key ?? "",
     pix_holder: row.pix_holder ?? "",
     stripe_public_key: row.stripe_public_key ?? "",
@@ -113,6 +114,7 @@ function mapSettings(row: any): Settings {
 const DEFAULT_SETTINGS: Settings = {
   storeName: "Loja",
   storeDescription: "",
+  logoUrl: "",
   pix_key: "",
   pix_holder: "",
   stripe_public_key: "",
@@ -611,6 +613,7 @@ function settingsPatchToDb(p: Partial<Settings>) {
   const o: any = {};
   if (p.storeName !== undefined) o.store_name = p.storeName;
   if (p.storeDescription !== undefined) o.store_description = p.storeDescription;
+  if (p.logoUrl !== undefined) o.logo_url = p.logoUrl;
   if (p.pix_key !== undefined) o.pix_key = p.pix_key;
   if (p.pix_holder !== undefined) o.pix_holder = p.pix_holder;
   if (p.stripe_public_key !== undefined) o.stripe_public_key = p.stripe_public_key;
