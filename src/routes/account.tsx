@@ -22,7 +22,8 @@ function AccountPage() {
   const router = useRouter();
   const user = useAuth((s) => s.current());
   const initialized = useAuth((s) => s.initialized);
-  const orders = useOrders((s) => (user ? s.orders.filter((o) => o.userId === user.id) : []));
+  const allOrders = useOrders((s) => s.orders);
+  const orders = user ? allOrders.filter((o) => o.userId === user.id) : [];
 
   useEffect(() => {
     if (!initialized) return;
