@@ -27,8 +27,11 @@ export function ProductForm({ initial, onSubmit }: { initial?: Product; onSubmit
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (f.images.length === 0) f.images = [`https://picsum.photos/seed/${Date.now()}/800`];
-    onSubmit(f);
+    const payload: Form = {
+      ...f,
+      images: f.images.length ? f.images : [`https://picsum.photos/seed/${Date.now()}/800`],
+    };
+    onSubmit(payload);
   };
 
   return (
@@ -53,6 +56,7 @@ export function ProductForm({ initial, onSubmit }: { initial?: Product; onSubmit
               <div>
                 <Label>Categoria</Label>
                 <select value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })} className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm">
+                  {categories.length === 0 && <option value="">Sem categoria</option>}
                   {categories.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
