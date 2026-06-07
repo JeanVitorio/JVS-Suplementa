@@ -1,7 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShoppingBag, Search, User as UserIcon, LogOut, LayoutDashboard, Package, Menu, X, Heart } from "lucide-react";
-import { useAuth, useCart } from "@/store";
+import { useAuth, useCart, useSettings } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,6 +17,7 @@ export function ShopHeader() {
   const router = useRouter();
   const user = useAuth((s) => s.current());
   const logout = useAuth((s) => s.logout);
+  const settings = useSettings((s) => s.settings);
   const count = useCart((s) => s.items.reduce((a, i) => a + i.quantity, 0));
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -33,8 +34,14 @@ export function ShopHeader() {
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
         <Link to="/" className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground font-bold">B</div>
-          <span className="hidden text-base font-semibold tracking-tight sm:inline">Bertolleti Shop</span>
+          {settings.logoUrl ? (
+            <img src={settings.logoUrl} alt={settings.storeName || "Logo da loja"} className="h-8 w-8 rounded-md object-cover" />
+          ) : (
+            <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground font-bold">
+              {(settings.storeName || "B").slice(0, 1).toUpperCase()}
+            </div>
+          )}
+          <span className="hidden text-base font-semibold tracking-tight sm:inline">{settings.storeName || "Bertolleti Shop"}</span>
         </Link>
 
         <form onSubmit={submit} className="relative ml-auto hidden flex-1 max-w-md md:block">
@@ -110,15 +117,23 @@ export function ShopHeader() {
 }
 
 export function ShopFooter() {
+  const settings = useSettings((s) => s.settings);
+
   return (
     <footer className="mt-20 border-t bg-muted/30">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground font-bold">B</div>
-            <span className="font-semibold">Bertolleti Shop</span>
+            {settings.logoUrl ? (
+              <img src={settings.logoUrl} alt={settings.storeName || "Logo da loja"} className="h-8 w-8 rounded-md object-cover" />
+            ) : (
+              <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground font-bold">
+                {(settings.storeName || "B").slice(0, 1).toUpperCase()}
+              </div>
+            )}
+            <span className="font-semibold">{settings.storeName || "Bertolleti Shop"}</span>
           </div>
-          <p className="text-sm text-muted-foreground">Curadoria premium em produtos para uma vida com mais design.</p>
+          <p className="text-sm text-muted-foreground">{settings.storeDescription || "Curadoria premium em produtos para uma vida com mais design."}</p>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-semibold">Loja</h4>
@@ -139,7 +154,7 @@ export function ShopFooter() {
         <div>
           <h4 className="mb-3 text-sm font-semibold">Atendimento</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>contato@bertolleti.com</li>
+            <li>{settings.email || "contato@bertolleti.com"}</li>
             <li>Seg–Sex, 9h–18h</li>
           </ul>
         </div>
@@ -149,7 +164,7 @@ export function ShopFooter() {
         </div>
       </div>
       <div className="border-t py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Bertolleti Shop. Todos os direitos reservados.
+        © {new Date().getFullYear()} {settings.storeName || "Bertolleti Shop"}. Todos os direitos reservados.
       </div>
     </footer>
   );
