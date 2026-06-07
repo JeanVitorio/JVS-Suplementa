@@ -1,7 +1,18 @@
 import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth, useSettings } from "@/store";
-import { LayoutDashboard, Package, Boxes, ShoppingCart, Users, Settings as SettingsIcon, LogOut, Store, Tag, MessageSquare } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Boxes,
+  ShoppingCart,
+  Users,
+  Settings as SettingsIcon,
+  LogOut,
+  Store,
+  Tag,
+  MessageSquare,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -41,14 +52,20 @@ function AdminLayout() {
       <aside className="fixed inset-y-0 left-0 hidden w-60 border-r bg-sidebar p-4 md:block">
         <Link to="/admin" className="mb-6 flex items-center gap-2">
           {settings.logoUrl ? (
-            <img src={settings.logoUrl} alt={settings.storeName || "Logo da loja"} className="h-8 w-8 rounded-md object-cover" />
+            <img
+              src={settings.logoUrl}
+              alt={settings.storeName || "Logo da loja"}
+              className="h-8 w-8 rounded-md object-cover"
+            />
           ) : (
             <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground font-bold">
               {(settings.storeName || "B").slice(0, 1).toUpperCase()}
             </div>
           )}
           <div>
-            <div className="text-sm font-semibold leading-tight">{settings.storeName || "Bertolleti"}</div>
+            <div className="text-sm font-semibold leading-tight">
+              {settings.storeName || "Bertolleti"}
+            </div>
             <div className="text-xs text-muted-foreground">Painel Admin</div>
           </div>
         </Link>
@@ -61,7 +78,9 @@ function AdminLayout() {
                 to={to}
                 className={cn(
                   "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition",
-                  active ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-sidebar-accent/60",
+                  active
+                    ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                    : "text-muted-foreground hover:bg-sidebar-accent/60",
                 )}
               >
                 <Icon className="h-4 w-4" /> {label}
@@ -70,10 +89,19 @@ function AdminLayout() {
           })}
         </nav>
         <div className="absolute inset-x-4 bottom-4 space-y-1">
-          <Link to="/" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent/60">
+          <Link
+            to="/"
+            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent/60"
+          >
             <Store className="h-4 w-4" /> Ver loja
           </Link>
-          <button onClick={() => { logout(); router.navigate({ to: "/" }); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent/60">
+          <button
+            onClick={() => {
+              logout();
+              router.navigate({ to: "/" });
+            }}
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-sidebar-accent/60"
+          >
             <LogOut className="h-4 w-4" /> Sair
           </button>
         </div>
@@ -84,7 +112,14 @@ function AdminLayout() {
         {NAV.map(({ to, label, icon: Icon, exact }) => {
           const active = exact ? loc.pathname === to : loc.pathname.startsWith(to);
           return (
-            <Link key={to} to={to} className={cn("flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs", active ? "bg-foreground text-background" : "bg-muted")}>
+            <Link
+              key={to}
+              to={to}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs",
+                active ? "bg-foreground text-background" : "bg-muted",
+              )}
+            >
               <Icon className="h-3.5 w-3.5" /> {label}
             </Link>
           );
