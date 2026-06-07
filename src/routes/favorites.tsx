@@ -6,14 +6,21 @@ import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/favorites")({
-  head: () => ({ meta: [{ title: "Favoritos — Bertolleti Shop" }, { name: "description", content: "Seus produtos favoritos." }] }),
+  head: () => ({
+    meta: [
+      { title: "Favoritos — Bertolleti Shop" },
+      { name: "description", content: "Seus produtos favoritos." },
+    ],
+    links: [{ rel: "canonical", href: "/favorites" }],
+  }),
   component: FavoritesPage,
 });
 
 function FavoritesPage() {
   const ids = useWishlist((s) => s.ids);
   const clear = useWishlist((s) => s.clear);
-  const products = useProducts((s) => s.products.filter((p) => ids.includes(p.id)));
+  const allProducts = useProducts((s) => s.products);
+  const products = allProducts.filter((p) => ids.includes(p.id));
 
   return (
     <div className="min-h-screen">
