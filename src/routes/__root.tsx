@@ -19,6 +19,7 @@ import {
   useReviews,
   useSettings,
   useCategories,
+  useOrders,
 } from "@/store";
 
 function NotFoundComponent() {
@@ -135,6 +136,7 @@ function RootComponent() {
     useReviews.getState().load();
     useSettings.getState().load();
     useCategories.getState().load();
+    useOrders.getState().load();
   }, []);
 
   return (
