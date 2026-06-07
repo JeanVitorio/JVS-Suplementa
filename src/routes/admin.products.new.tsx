@@ -15,10 +15,14 @@ function NewProduct() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Novo produto</h1>
       <ProductForm
-        onSubmit={(data) => {
-          add(data);
+        onSubmit={async (data) => {
+          const created = await add(data);
+          if (!created) {
+            toast.error("Não foi possível criar o produto");
+            return;
+          }
           toast.success("Produto criado!");
-          router.navigate({ to: "/admin/products" });
+          router.navigate({ to: "/admin/products/$id", params: { id: created.id } });
         }}
       />
     </div>

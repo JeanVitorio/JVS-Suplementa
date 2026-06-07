@@ -99,6 +99,7 @@ function mapSettings(row: any): Settings {
   return {
     storeName: row.store_name ?? "",
     storeDescription: row.store_description ?? "",
+    logoUrl: row.logo_url ?? "",
     pix_key: row.pix_key ?? "",
     pix_holder: row.pix_holder ?? "",
     stripe_public_key: row.stripe_public_key ?? "",
@@ -113,6 +114,7 @@ function mapSettings(row: any): Settings {
 const DEFAULT_SETTINGS: Settings = {
   storeName: "Loja",
   storeDescription: "",
+  logoUrl: "",
   pix_key: "",
   pix_holder: "",
   stripe_public_key: "",
@@ -132,7 +134,11 @@ interface AuthState {
   current: () => User | null;
   isAdmin: () => boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
-  register: (data: { name: string; email: string; password: string }) => Promise<{ ok: boolean; error?: string }>;
+  register: (data: {
+    name: string;
+    email: string;
+    password: string;
+  }) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -140,7 +146,11 @@ interface AuthState {
 async function loadUserFromAuth(authUser: any): Promise<User | null> {
   if (!authUser) return null;
   const sb = req();
-  const { data: profile } = await sb.from("profiles").select("name, email").eq("id", authUser.id).maybeSingle();
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("name, email")
+    .eq("id", authUser.id)
+    .maybeSingle();
   const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", authUser.id);
   const isAdmin = (roles ?? []).some((r: any) => r.role === "admin");
   return {
@@ -209,7 +219,9 @@ export const useAuth = create<AuthState>()((set, get) => ({
     }
     // Tenta criar profile (se trigger não existir)
     if (data.user) {
-      await supabase.from("profiles").upsert({ id: data.user.id, name, email }, { onConflict: "id" });
+      await supabase
+        .from("profiles")
+        .upsert({ id: data.user.id, name, email }, { onConflict: "id" });
     }
     set({ loading: false });
     await get().refresh();
@@ -292,14 +304,21 @@ export const useProducts = create<ProductState>()((set, get) => ({
   load: async () => {
     if (!supabase) return;
     set({ loading: true });
-    const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (error) console.error("[products] load:", error);
     set({ products: (data ?? []).map(mapProduct), loading: false });
   },
 
   add: async (p) => {
     const sb = req();
-    const { data, error } = await sb.from("products").insert(productPatchToDb(p as Partial<Product>)).select("*").single();
+    const { data, error } = await sb
+      .from("products")
+      .insert(productPatchToDb(p as Partial<Product>))
+      .select("*")
+      .single();
     if (error) {
       console.error(error);
       return null;
@@ -352,7 +371,12 @@ export const useCart = create<CartState>()(
       items: [],
       add: (productId, qty = 1) => {
         const ex = get().items.find((i) => i.productId === productId);
-        if (ex) set({ items: get().items.map((i) => (i.productId === productId ? { ...i, quantity: i.quantity + qty } : i)) });
+        if (ex)
+          set({
+            items: get().items.map((i) =>
+              i.productId === productId ? { ...i, quantity: i.quantity + qty } : i,
+            ),
+          });
         else set({ items: [...get().items, { productId, quantity: qty }] });
       },
       remove: (productId) => set({ items: get().items.filter((i) => i.productId !== productId) }),
@@ -366,8 +390,8 @@ export const useCart = create<CartState>()(
       clear: () => set({ items: [] }),
       count: () => get().items.reduce((s, i) => s + i.quantity, 0),
     }),
-    { name: "bsh-cart" }
-  )
+    { name: "bsh-cart" },
+  ),
 );
 
 /* ============ Wishlist (Supabase quando logado, localStorage senão) ============ */
@@ -387,7 +411,10 @@ export const useWishlist = create<WishlistState>()(
         if (!supabase) return;
         const { data: u } = await supabase.auth.getUser();
         if (!u.user) return;
-        const { data } = await supabase.from("wishlist").select("product_id").eq("user_id", u.user.id);
+        const { data } = await supabase
+          .from("wishlist")
+          .select("product_id")
+          .eq("user_id", u.user.id);
         set({ ids: (data ?? []).map((r: any) => r.product_id) });
       },
       toggle: async (productId) => {
@@ -397,7 +424,11 @@ export const useWishlist = create<WishlistState>()(
         const { data: u } = await supabase.auth.getUser();
         if (!u.user) return;
         if (has) {
-          await supabase.from("wishlist").delete().eq("user_id", u.user.id).eq("product_id", productId);
+          await supabase
+            .from("wishlist")
+            .delete()
+            .eq("user_id", u.user.id)
+            .eq("product_id", productId);
         } else {
           await supabase.from("wishlist").insert({ user_id: u.user.id, product_id: productId });
         }
@@ -405,8 +436,8 @@ export const useWishlist = create<WishlistState>()(
       has: (productId) => get().ids.includes(productId),
       clear: () => set({ ids: [] }),
     }),
-    { name: "bsh-wishlist" }
-  )
+    { name: "bsh-wishlist" },
+  ),
 );
 
 /* ============ Reviews ============ */
@@ -426,7 +457,10 @@ export const useReviews = create<ReviewState>()((set, get) => ({
   load: async () => {
     if (!supabase) return;
     set({ loading: true });
-    const { data, error } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (error) console.error(error);
     set({ reviews: (data ?? []).map(mapReview), loading: false });
   },
@@ -473,9 +507,10 @@ interface CouponState {
   add: (c: Omit<Coupon, "id" | "createdAt">) => Promise<Coupon | null>;
   update: (id: string, patch: Partial<Coupon>) => Promise<void>;
   remove: (id: string) => Promise<void>;
-  validate: (code: string, subtotal: number) =>
-    | { ok: true; coupon: Coupon; discount: number }
-    | { ok: false; error: string };
+  validate: (
+    code: string,
+    subtotal: number,
+  ) => { ok: true; coupon: Coupon; discount: number } | { ok: false; error: string };
 }
 
 function couponPatchToDb(p: Partial<Coupon>) {
@@ -495,13 +530,20 @@ export const useCoupons = create<CouponState>()((set, get) => ({
   load: async () => {
     if (!supabase) return;
     set({ loading: true });
-    const { data, error } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("coupons")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (error) console.error(error);
     set({ coupons: (data ?? []).map(mapCoupon), loading: false });
   },
   add: async (c) => {
     const sb = req();
-    const { data, error } = await sb.from("coupons").insert(couponPatchToDb(c as Partial<Coupon>)).select("*").single();
+    const { data, error } = await sb
+      .from("coupons")
+      .insert(couponPatchToDb(c as Partial<Coupon>))
+      .select("*")
+      .single();
     if (error) {
       console.error(error);
       return null;
@@ -526,10 +568,14 @@ export const useCoupons = create<CouponState>()((set, get) => ({
     const c = get().coupons.find((x) => x.code.toLowerCase() === code.toLowerCase());
     if (!c) return { ok: false, error: "Cupom inválido." };
     if (!c.active) return { ok: false, error: "Cupom inativo." };
-    if (c.expiresAt && new Date(c.expiresAt) < new Date()) return { ok: false, error: "Cupom expirado." };
+    if (c.expiresAt && new Date(c.expiresAt) < new Date())
+      return { ok: false, error: "Cupom expirado." };
     if (c.minSubtotal && subtotal < c.minSubtotal)
       return { ok: false, error: `Pedido mínimo de R$ ${c.minSubtotal.toFixed(2)}.` };
-    const discount = c.type === "percent" ? Math.min(subtotal, subtotal * (c.value / 100)) : Math.min(subtotal, c.value);
+    const discount =
+      c.type === "percent"
+        ? Math.min(subtotal, subtotal * (c.value / 100))
+        : Math.min(subtotal, c.value);
     return { ok: true, coupon: c, discount };
   },
 }));
@@ -562,7 +608,10 @@ export const useOrders = create<OrderState>()((set, get) => ({
   load: async () => {
     if (!supabase) return;
     set({ loading: true });
-    const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (error) {
       console.error(error);
       set({ loading: false });
@@ -579,7 +628,11 @@ export const useOrders = create<OrderState>()((set, get) => ({
     const items = await fetchOrderItems([id]);
     const order = mapOrder(data, items[id] ?? []);
     const existing = get().orders;
-    set({ orders: existing.some((o) => o.id === id) ? existing.map((o) => (o.id === id ? order : o)) : [order, ...existing] });
+    set({
+      orders: existing.some((o) => o.id === id)
+        ? existing.map((o) => (o.id === id ? order : o))
+        : [order, ...existing],
+    });
     return order;
   },
   setStatus: async (id, status) => {
@@ -611,6 +664,7 @@ function settingsPatchToDb(p: Partial<Settings>) {
   const o: any = {};
   if (p.storeName !== undefined) o.store_name = p.storeName;
   if (p.storeDescription !== undefined) o.store_description = p.storeDescription;
+  if (p.logoUrl !== undefined) o.logo_url = p.logoUrl;
   if (p.pix_key !== undefined) o.pix_key = p.pix_key;
   if (p.pix_holder !== undefined) o.pix_holder = p.pix_holder;
   if (p.stripe_public_key !== undefined) o.stripe_public_key = p.stripe_public_key;
@@ -670,7 +724,10 @@ export const useCategories = create<CategoriesState>()((set) => ({
   load: async () => {
     if (!supabase) return;
     set({ loading: true });
-    const { data, error } = await supabase.from("categories").select("name").order("position", { ascending: true });
+    const { data, error } = await supabase
+      .from("categories")
+      .select("name")
+      .order("position", { ascending: true });
     if (error) {
       console.error(error);
       set({ loading: false });
@@ -727,7 +784,9 @@ export async function checkout(params: {
   }
 
   const shipping =
-    settings.freeShippingAbove > 0 && subtotal - discount >= settings.freeShippingAbove ? 0 : settings.shippingFlat;
+    settings.freeShippingAbove > 0 && subtotal - discount >= settings.freeShippingAbove
+      ? 0
+      : settings.shippingFlat;
   const total = Math.max(0, subtotal - discount + shipping);
 
   const { data: orderRow, error: orderErr } = await supabase

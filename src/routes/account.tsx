@@ -22,7 +22,8 @@ function AccountPage() {
   const router = useRouter();
   const user = useAuth((s) => s.current());
   const initialized = useAuth((s) => s.initialized);
-  const orders = useOrders((s) => (user ? s.orders.filter((o) => o.userId === user.id) : []));
+  const allOrders = useOrders((s) => s.orders);
+  const orders = user ? allOrders.filter((o) => o.userId === user.id) : [];
 
   useEffect(() => {
     if (!initialized) return;
@@ -44,7 +45,9 @@ function AccountPage() {
         {orders.length === 0 ? (
           <div className="rounded-xl border bg-muted/20 p-12 text-center">
             <p className="text-muted-foreground">Você ainda não fez pedidos.</p>
-            <Link to="/" className="mt-4 inline-block"><Button>Explorar produtos</Button></Link>
+            <Link to="/" className="mt-4 inline-block">
+              <Button>Explorar produtos</Button>
+            </Link>
           </div>
         ) : (
           <div className="space-y-3">
@@ -54,24 +57,44 @@ function AccountPage() {
                 <div key={o.id} className="rounded-xl border bg-card p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <div className="text-sm font-medium">Pedido #{o.id.slice(-8).toUpperCase()}</div>
-                      <div className="text-xs text-muted-foreground">{formatDate(o.createdAt)} · {o.items.length} {o.items.length === 1 ? "item" : "itens"}</div>
+                      <div className="text-sm font-medium">
+                        Pedido #{o.id.slice(-8).toUpperCase()}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatDate(o.createdAt)} · {o.items.length}{" "}
+                        {o.items.length === 1 ? "item" : "itens"}
+                      </div>
                     </div>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}>{st.label}</span>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}>
+                      {st.label}
+                    </span>
                   </div>
                   <div className="my-3 flex gap-2 overflow-x-auto">
                     {o.items.slice(0, 5).map((it) => (
-                      <div key={it.id} className="h-14 w-14 shrink-0 overflow-hidden rounded-md bg-muted">
-                        {it.image && <img src={it.image} alt="" className="h-full w-full object-cover" />}
+                      <div
+                        key={it.id}
+                        className="h-14 w-14 shrink-0 overflow-hidden rounded-md bg-muted"
+                      >
+                        {it.image && (
+                          <img src={it.image} alt="" className="h-full w-full object-cover" />
+                        )}
                       </div>
                     ))}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{o.paymentMethod === "pix" ? "PIX" : "Cartão"}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {o.paymentMethod === "pix" ? "PIX" : "Cartão"}
+                    </span>
                     <div className="font-semibold">{brl(o.total)}</div>
                   </div>
                   {o.status === "aguardando_pagamento" && (
-                    <Link to="/checkout/success" search={{ id: o.id } as never} className="mt-3 inline-block text-sm font-medium underline">Ver PIX para pagamento</Link>
+                    <Link
+                      to="/checkout/success"
+                      search={{ id: o.id } as never}
+                      className="mt-3 inline-block text-sm font-medium underline"
+                    >
+                      Ver PIX para pagamento
+                    </Link>
                   )}
                 </div>
               );
