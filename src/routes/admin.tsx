@@ -12,6 +12,7 @@ import {
   Store,
   Tag,
   MessageSquare,
+  FolderTree,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/admin")({
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Produtos", icon: Package },
+  { to: "/admin/categories", label: "Categorias", icon: FolderTree },
   { to: "/admin/stock", label: "Estoque", icon: Boxes },
   { to: "/admin/orders", label: "Pedidos", icon: ShoppingCart },
   { to: "/admin/customers", label: "Clientes", icon: Users },

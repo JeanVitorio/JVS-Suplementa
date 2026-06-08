@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCategories } from "@/store";
+import { useCategories, uploadProductImage, generateUniqueSku } from "@/store";
 import type { Product } from "@/lib/types";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Upload, Loader2, Wand2 } from "lucide-react";
+import { toast } from "sonner";
 
 type Form = Omit<Product, "id" | "createdAt">;
 
@@ -30,14 +31,34 @@ export function ProductForm({
     featured: initial?.featured ?? false,
   });
   const [newImg, setNewImg] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [autoSku, setAutoSku] = useState(!initial?.sku);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let sku = f.sku.trim();
+    if (autoSku || !sku) {
+      sku = await generateUniqueSku();
+    }
     const payload: Form = {
       ...f,
+      sku,
       images: f.images.length ? f.images : [`https://picsum.photos/seed/${Date.now()}/800`],
     };
     onSubmit(payload);
+  };
+
+  const onFiles = async (files: FileList | null) => {
+    if (!files || !files.length) return;
+    setUploading(true);
+    const uploaded: string[] = [];
+    for (const file of Array.from(files)) {
+      const url = await uploadProductImage(file);
+      if (url) uploaded.push(url);
+      else toast.error(`Falha ao subir ${file.name}`);
+    }
+    if (uploaded.length) setF((p) => ({ ...p, images: [...p.images, ...uploaded] }));
+    setUploading(false);
   };
 
   return (
@@ -67,11 +88,26 @@ export function ProductForm({
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label>SKU</Label>
-                <Input
-                  value={f.sku}
-                  onChange={(e) => setF({ ...f, sku: e.target.value })}
-                  className="mt-1"
-                />
+                <div className="mt-1 flex gap-2">
+                  <Input
+                    value={autoSku ? "(gerado ao salvar)" : f.sku}
+                    disabled={autoSku}
+                    onChange={(e) => setF({ ...f, sku: e.target.value })}
+                    placeholder="Opcional"
+                  />
+                  <Button
+                    type="button"
+                    variant={autoSku ? "default" : "outline"}
+                    size="icon"
+                    title="Gerar automaticamente"
+                    onClick={() => setAutoSku((v) => !v)}
+                  >
+                    <Wand2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {autoSku ? "SKU único será gerado automaticamente." : "Deixe vazio para gerar automaticamente."}
+                </p>
               </div>
               <div>
                 <Label>Categoria</Label>
@@ -111,11 +147,32 @@ export function ProductForm({
               </div>
             ))}
           </div>
+          <div className="mt-3">
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed bg-muted/30 px-3 py-6 text-sm text-muted-foreground hover:bg-muted/50">
+              {uploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Enviando...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" /> Clique para enviar imagens do seu computador
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => onFiles(e.target.files)}
+              />
+            </label>
+          </div>
           <div className="mt-3 flex gap-2">
             <Input
               value={newImg}
               onChange={(e) => setNewImg(e.target.value)}
-              placeholder="URL da imagem"
+              placeholder="...ou cole uma URL"
             />
             <Button
               type="button"
@@ -130,9 +187,6 @@ export function ProductForm({
               <Plus className="h-4 w-4" />
             </Button>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Cole uma URL de imagem. Em produção, conecte o storage de imagens.
-          </p>
         </div>
       </div>
 

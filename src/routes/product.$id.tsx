@@ -16,8 +16,9 @@ export const Route = createFileRoute("/product/$id")({
 function ProductPage() {
   const { id } = Route.useParams();
   const router = useRouter();
-  const product = useProducts((s) => s.products.find((p) => p.id === id));
-  const related = useProducts((s) => s.products.filter((p) => p.id !== id && p.active).slice(0, 4));
+  const products = useProducts((s) => s.products);
+  const product = products.find((p) => p.id === id);
+  const related = products.filter((p) => p.id !== id && p.active).slice(0, 4);
   const add = useCart((s) => s.add);
   const user = useAuth((s) => s.current());
   const [qty, setQty] = useState(1);
@@ -143,9 +144,11 @@ function ProductPage() {
 
 function ReviewsSection({ productId }: { productId: string }) {
   const user = useAuth((s) => s.current());
-  const reviews = useReviews((s) => s.reviews.filter((r) => r.productId === productId));
+  const allReviews = useReviews((s) => s.reviews);
+  const reviews = allReviews.filter((r) => r.productId === productId);
   const addReview = useReviews((s) => s.add);
-  const avg = useReviews((s) => s.avg(productId));
+  const avgFn = useReviews((s) => s.avg);
+  const avg = avgFn(productId);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
 
