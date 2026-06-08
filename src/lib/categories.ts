@@ -7,4 +7,8 @@ export const DEFAULT_CATEGORIES = [
   "Acessórios",
   "Escritório",
   "Bem-estar",
+  "Esportes",
+  "Brinquedos",
+  "Alimentos",
+  "Bebidas",
 ];

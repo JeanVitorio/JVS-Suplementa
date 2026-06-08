@@ -66,7 +66,7 @@ export function ProductForm({
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label>SKU</Label>
+                <Label>SKU (código único do produto)</Label>
                 <Input
                   value={f.sku}
                   onChange={(e) => setF({ ...f, sku: e.target.value })}

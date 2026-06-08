@@ -198,7 +198,7 @@ export function ShopFooter() {
         <div>
           <h4 className="mb-3 text-sm font-semibold">Atendimento</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>{settings.email || "contato@bertolleti.com"}</li>
+            <li>{settings.email || "+55 46 99110-2704"}</li>
             <li>Seg–Sex, 9h–18h</li>
           </ul>
         </div>
