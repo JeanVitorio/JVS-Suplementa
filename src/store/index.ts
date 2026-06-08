@@ -712,13 +712,35 @@ export const useSettings = create<SettingsState>()((set, get) => ({
 }));
 
 /* ============ Categories ============ */
-interface CategoriesState {
-  categories: string[];
-  loading: boolean;
-  load: () => Promise<void>;
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  imageUrl?: string | null;
+  position: number;
 }
 
-export const useCategories = create<CategoriesState>()((set) => ({
+interface CategoriesState {
+  items: Category[];
+  categories: string[]; // nomes (compat)
+  loading: boolean;
+  load: () => Promise<void>;
+  add: (data: { name: string; slug?: string; imageUrl?: string; position?: number }) => Promise<Category | null>;
+  update: (id: string, patch: Partial<Omit<Category, "id">>) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+}
+
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
+
+export const useCategories = create<CategoriesState>()((set, get) => ({
+  items: [],
   categories: DEFAULT_CATEGORIES,
   loading: false,
   load: async () => {
@@ -726,17 +748,99 @@ export const useCategories = create<CategoriesState>()((set) => ({
     set({ loading: true });
     const { data, error } = await supabase
       .from("categories")
-      .select("name")
+      .select("id, name, slug, image_url, position")
       .order("position", { ascending: true });
     if (error) {
       console.error(error);
       set({ loading: false });
       return;
     }
-    const list = (data ?? []).map((c: any) => c.name as string);
-    set({ categories: list.length ? list : DEFAULT_CATEGORIES, loading: false });
+    const items: Category[] = (data ?? []).map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      imageUrl: c.image_url,
+      position: c.position ?? 0,
+    }));
+    set({
+      items,
+      categories: items.length ? items.map((i) => i.name) : DEFAULT_CATEGORIES,
+      loading: false,
+    });
+  },
+  add: async ({ name, slug, imageUrl, position }) => {
+    const sb = req();
+    const { data, error } = await sb
+      .from("categories")
+      .insert({
+        name,
+        slug: slug?.trim() ? slugify(slug) : slugify(name),
+        image_url: imageUrl ?? null,
+        position: position ?? get().items.length,
+      })
+      .select("*")
+      .single();
+    if (error) {
+      console.error(error);
+      return null;
+    }
+    await get().load();
+    return {
+      id: data.id,
+      name: data.name,
+      slug: data.slug,
+      imageUrl: data.image_url,
+      position: data.position,
+    };
+  },
+  update: async (id, patch) => {
+    const sb = req();
+    const dbPatch: any = {};
+    if (patch.name !== undefined) dbPatch.name = patch.name;
+    if (patch.slug !== undefined) dbPatch.slug = slugify(patch.slug);
+    if (patch.imageUrl !== undefined) dbPatch.image_url = patch.imageUrl;
+    if (patch.position !== undefined) dbPatch.position = patch.position;
+    const { error } = await sb.from("categories").update(dbPatch).eq("id", id);
+    if (error) return console.error(error);
+    await get().load();
+  },
+  remove: async (id) => {
+    const sb = req();
+    const { error } = await sb.from("categories").delete().eq("id", id);
+    if (error) return console.error(error);
+    await get().load();
   },
 }));
+
+/* ============ Storage helpers ============ */
+export async function uploadProductImage(file: File): Promise<string | null> {
+  if (!supabase) return null;
+  const ext = file.name.split(".").pop() || "jpg";
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage
+    .from("product-images")
+    .upload(path, file, { cacheControl: "3600", upsert: false });
+  if (error) {
+    console.error("[upload]", error);
+    return null;
+  }
+  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export async function generateUniqueSku(): Promise<string> {
+  if (!supabase) return `SKU-${Date.now().toString(36).toUpperCase()}`;
+  for (let i = 0; i < 8; i++) {
+    const candidate = `SKU-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const { data } = await supabase
+      .from("products")
+      .select("id")
+      .eq("sku", candidate)
+      .maybeSingle();
+    if (!data) return candidate;
+  }
+  return `SKU-${Date.now().toString(36).toUpperCase()}`;
+}
 
 /* ============ Checkout (Supabase) ============ */
 export async function checkout(params: {
