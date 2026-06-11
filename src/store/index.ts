@@ -813,20 +813,26 @@ export const useCategories = create<CategoriesState>()((set, get) => ({
 }));
 
 /* ============ Storage helpers ============ */
-export async function uploadProductImage(file: File): Promise<string | null> {
+async function uploadToBucket(bucket: string, file: File, prefix = ""): Promise<string | null> {
   if (!supabase) return null;
   const ext = file.name.split(".").pop() || "jpg";
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const path = `${prefix}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error } = await supabase.storage
-    .from("product-images")
+    .from(bucket)
     .upload(path, file, { cacheControl: "3600", upsert: false });
   if (error) {
-    console.error("[upload]", error);
+    console.error(`[upload:${bucket}]`, error);
     return null;
   }
-  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;
 }
+
+export const uploadProductImage = (file: File) => uploadToBucket("product-images", file);
+export const uploadStoreLogo = (file: File) => uploadToBucket("store-assets", file, "logo/");
+export const uploadCategoryImage = (file: File) => uploadToBucket("category-images", file);
+export const uploadUserAvatar = (file: File, userId: string) =>
+  uploadToBucket("avatars", file, `${userId}/`);
 
 export async function generateUniqueSku(): Promise<string> {
   if (!supabase) return `SKU-${Date.now().toString(36).toUpperCase()}`;
