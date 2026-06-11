@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
+import type { Product } from "@/lib/types";
 
 export const Route = createFileRoute("/admin/products")({
   component: ProductsList,
@@ -28,6 +29,7 @@ function ProductsList() {
   const add = useProducts((s) => s.add);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Product | null>(null);
   const filtered = products.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
 
   return (
@@ -145,11 +147,14 @@ function ProductsList() {
                 </td>
                 <td className="p-3">
                   <div className="flex justify-end gap-1">
-                    <Link to="/admin/products/$id" params={{ id: p.id }}>
-                      <Button variant="ghost" size="icon">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditing(p)}
+                      title="Editar"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -176,6 +181,28 @@ function ProductsList() {
           </tbody>
         </table>
       </div>
+
+      {/* Dialog de edição */}
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar produto</DialogTitle>
+            <DialogDescription>
+              Altere as informações abaixo e salve para atualizar o produto.
+            </DialogDescription>
+          </DialogHeader>
+          {editing && (
+            <ProductForm
+              initial={editing}
+              onSubmit={async (data) => {
+                await update(editing.id, data);
+                toast.success("Produto atualizado!");
+                setEditing(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
