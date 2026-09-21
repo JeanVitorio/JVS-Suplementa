@@ -20,8 +20,9 @@ import {
   useSettings,
   useCategories,
   useOrders,
+  useCustomers,
 } from "@/store";
-import { mockCoupons, mockProducts, mockReviews, mockSettings } from "@/lib/mock-data";
+import { mockCoupons, mockOrders, mockProducts, mockReviews, mockSettings, mockUsers } from "@/lib/mock-data";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 
 function NotFoundComponent() {
@@ -137,7 +138,8 @@ function RootComponent() {
     useReviews.setState({ reviews: mockReviews, loading: false });
     useSettings.setState({ settings: mockSettings, loading: false });
     useCategories.setState({ categories: DEFAULT_CATEGORIES, items: DEFAULT_CATEGORIES.map((name, position) => ({ id: `cat-${position}`, name, slug: name.toLowerCase(), position })), loading: false });
-    useOrders.setState({ loading: false });
+    useOrders.setState({ orders: mockOrders, loading: false });
+    useCustomers.setState({ customers: mockUsers.filter((user) => user.role === "client"), loading: false });
   }, []);
 
   return (

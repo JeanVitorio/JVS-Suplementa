@@ -36,7 +36,7 @@ function SettingsPage() {
     const url = await uploadStoreLogo(file);
     setUploading(false);
     if (!url) {
-      toast.error("Falha ao subir a logo. Crie o bucket 'store-assets' rodando o SQL v4.");
+      toast.error("Não foi possível carregar a imagem.");
       return;
     }
     setF((p) => ({ ...p, logoUrl: url }));
@@ -111,9 +111,7 @@ function SettingsPage() {
                   Remover
                 </Button>
               )}
-              <p className="text-xs text-muted-foreground">
-                PNG/JPG/SVG. Recomendado 512×512. Armazenada no bucket <code>store-assets</code>.
-              </p>
+              <p className="text-xs text-muted-foreground">PNG, JPG ou SVG. Recomendado: 512 × 512.</p>
             </div>
           </div>
         </div>

@@ -9,8 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { supabase } from "@/lib/supabase";
-import { Mail, Phone, Instagram, MapPin, Calendar, ShoppingBag, Loader2 } from "lucide-react";
+import { Mail, Phone, Instagram, MapPin, Calendar, ShoppingBag } from "lucide-react";
 
 export const Route = createFileRoute("/admin/customers")({
   component: CustomersPage,
@@ -34,7 +33,6 @@ function CustomersPage() {
   const loadOrders = useOrders((s) => s.load);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [profile, setProfile] = useState<FullProfile | null>(null);
-  const [loadingProfile, setLoadingProfile] = useState(false);
 
   useEffect(() => {
     loadCustomers();
@@ -43,16 +41,8 @@ function CustomersPage() {
 
   const openCustomer = async (id: string) => {
     setSelectedId(id);
-    setProfile(null);
-    if (!supabase) return;
-    setLoadingProfile(true);
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, name, email, avatar_url, whatsapp, instagram, address, created_at")
-      .eq("id", id)
-      .maybeSingle();
-    if (!error && data) setProfile(data as FullProfile);
-    setLoadingProfile(false);
+    const user = users.find((item) => item.id === id);
+    setProfile(user ? { id: user.id, name: user.name, email: user.email, avatar_url: user.avatarUrl, whatsapp: user.phone, instagram: user.instagram, address: user.address, created_at: user.createdAt } : null);
   };
 
   const customerOrders = selectedId
@@ -120,13 +110,7 @@ function CustomersPage() {
             <DialogDescription>Todas as informações cadastradas pelo cliente.</DialogDescription>
           </DialogHeader>
 
-          {loadingProfile && (
-            <div className="flex items-center gap-2 py-8 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Carregando perfil...
-            </div>
-          )}
-
-          {profile && !loadingProfile && (
+          {profile && (
             <div className="space-y-5">
               <div className="flex items-center gap-4">
                 {profile.avatar_url ? (

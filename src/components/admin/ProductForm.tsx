@@ -122,13 +122,16 @@ export function ProductForm({
                 className="group relative aspect-square overflow-hidden rounded-md bg-muted"
               >
                 <img src={src} alt="" className="h-full w-full object-cover" />
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="icon"
+                  aria-label="Remover imagem"
                   onClick={() => setF({ ...f, images: f.images.filter((_, j) => j !== i) })}
                   className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-background/90 opacity-0 transition group-hover:opacity-100"
                 >
                   <X className="h-3 w-3" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>

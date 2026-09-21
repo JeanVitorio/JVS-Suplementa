@@ -6,6 +6,10 @@ export interface User {
   email: string;
   role: Role;
   createdAt: string;
+  avatarUrl?: string;
+  phone?: string;
+  instagram?: string;
+  address?: Partial<Address>;
 }
 
 export interface Product {

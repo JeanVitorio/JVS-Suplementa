@@ -1,112 +1,61 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useOrders, useProducts, useCustomers } from "@/store";
+import { ArrowRight, Boxes, CircleDollarSign, Clock3, Package, ShoppingCart, TrendingUp, TriangleAlert, Users } from "lucide-react";
+import { useCustomers, useOrders, useProducts } from "@/store";
 import { brl, formatDate } from "@/lib/format";
-import { ShoppingCart, Package, DollarSign, Users, TrendingUp, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin/")({
+  head: () => ({ meta: [
+    { title: "Central de comando | Bertolleti Performance" },
+    { name: "description", content: "Visão operacional da loja Bertolleti Performance." },
+    { property: "og:title", content: "Central de comando | Bertolleti Performance" },
+    { property: "og:description", content: "Indicadores, pedidos e estoque em uma visão operacional." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Dashboard,
 });
 
 function Dashboard() {
-  const orders = useOrders((s) => s.orders);
-  const loadOrders = useOrders((s) => s.load);
-  const products = useProducts((s) => s.products);
-  const users = useCustomers((s) => s.customers);
-  const loadCustomers = useCustomers((s) => s.load);
-
-  useEffect(() => {
-    loadOrders();
-    loadCustomers();
-  }, [loadOrders, loadCustomers]);
-
-  const revenue = orders.filter(o => o.status !== "cancelado").reduce((s, o) => s + o.total, 0);
-  const pending = orders.filter(o => o.status === "aguardando_pagamento").length;
-  const lowStock = products.filter(p => p.stock > 0 && p.stock <= 5);
-  const out = products.filter(p => p.stock === 0);
-  const clients = users.length;
-
+  const orders = useOrders((state) => state.orders);
+  const products = useProducts((state) => state.products);
+  const customers = useCustomers((state) => state.customers);
+  const revenue = orders.filter((order) => order.status !== "cancelado").reduce((sum, order) => sum + order.total, 0);
+  const lowStock = products.filter((product) => product.stock <= 20);
+  const avgTicket = orders.length ? revenue / orders.length : 0;
   const stats = [
-    { label: "Faturamento", value: brl(revenue), icon: DollarSign, sub: `${orders.length} pedidos` },
-    { label: "Pedidos pendentes", value: String(pending), icon: ShoppingCart, sub: "Aguardando pagamento" },
-    { label: "Produtos ativos", value: String(products.filter(p => p.active).length), icon: Package, sub: `${products.length} no total` },
-    { label: "Clientes", value: String(clients), icon: Users, sub: "Cadastrados" },
+    { label: "Receita no período", value: brl(revenue), change: "+18,4%", icon: CircleDollarSign },
+    { label: "Pedidos ativos", value: String(orders.filter((order) => !["entregue", "cancelado"].includes(order.status)).length), change: "+6 hoje", icon: ShoppingCart },
+    { label: "Ticket médio", value: brl(avgTicket), change: "+8,2%", icon: TrendingUp },
+    { label: "Base de clientes", value: String(customers.length), change: "+12 este mês", icon: Users },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Visão geral da sua loja</p>
-      </div>
+    <div className="space-y-7">
+      <section className="flex flex-wrap items-end justify-between gap-5">
+        <div><p className="text-xs font-bold uppercase text-primary">Segunda-feira, 21 de setembro</p><h1 className="mt-2 text-3xl uppercase md:text-5xl">Operação em alta.</h1><p className="mt-2 text-muted-foreground">Tudo o que importa para vender mais, sem ruído.</p></div>
+        <div className="flex gap-2"><Link to="/admin/products/new"><Button variant="outline" className="rounded-sm"><Package className="h-4 w-4" /> Novo produto</Button></Link><Link to="/admin/orders"><Button className="rounded-sm">Ver pedidos <ArrowRight className="h-4 w-4" /></Button></Link></div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map(({ label, value, icon: Icon, sub }) => (
-          <div key={label} className="rounded-xl border bg-card p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{label}</span>
-              <Icon className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="text-2xl font-bold">{value}</div>
-            <div className="mt-1 text-xs text-muted-foreground">{sub}</div>
-          </div>
-        ))}
-      </div>
+      <section className="grid gap-px overflow-hidden border bg-border sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map(({ label, value, change, icon: Icon }) => <article key={label} className="bg-card p-5"><div className="flex items-center justify-between"><span className="text-xs font-bold uppercase text-muted-foreground">{label}</span><Icon className="h-4 w-4 text-primary" /></div><strong className="mt-5 block font-display text-3xl">{value}</strong><span className="mt-2 inline-block bg-primary/15 px-2 py-0.5 text-xs font-bold text-foreground">{change}</span></article>)}
+      </section>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border bg-card p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Pedidos recentes</h2>
-            <Link to="/admin/orders" className="text-sm text-muted-foreground hover:text-foreground">Ver todos</Link>
+      <section className="grid gap-6 xl:grid-cols-[1.45fr_0.55fr]">
+        <article className="border bg-card">
+          <header className="flex items-center justify-between border-b p-5"><div><p className="text-xs font-bold uppercase text-muted-foreground">Fluxo ao vivo</p><h2 className="mt-1 text-xl uppercase">Pedidos recentes</h2></div><Link to="/admin/orders" className="text-sm font-bold text-primary">Ver todos</Link></header>
+          <div className="divide-y">
+            {orders.map((order) => <Link key={order.id} to="/admin/orders/$id" params={{ id: order.id }} className="grid items-center gap-3 p-4 transition hover:bg-muted/40 sm:grid-cols-[1fr_1.4fr_1fr_auto]"><div><strong className="block text-sm">#{order.id.slice(-8).toUpperCase()}</strong><span className="text-xs text-muted-foreground">{formatDate(order.createdAt)}</span></div><span className="truncate text-sm text-muted-foreground">{order.userEmail}</span><span className="flex items-center gap-1.5 text-xs font-bold uppercase"><Clock3 className="h-3.5 w-3.5 text-primary" />{order.status.replaceAll("_", " ")}</span><strong className="text-right">{brl(order.total)}</strong></Link>)}
           </div>
-          {orders.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">Nenhum pedido ainda.</p>
-          ) : (
-            <div className="space-y-2">
-              {orders.slice(0, 6).map((o) => (
-                <Link key={o.id} to="/admin/orders/$id" params={{ id: o.id }} className="flex items-center justify-between rounded-lg p-2 hover:bg-muted/50">
-                  <div>
-                    <div className="text-sm font-medium">#{o.id.slice(-8).toUpperCase()}</div>
-                    <div className="text-xs text-muted-foreground">{o.userEmail} · {formatDate(o.createdAt)}</div>
-                  </div>
-                  <div className="font-semibold">{brl(o.total)}</div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+        </article>
 
-        <div className="rounded-xl border bg-card p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Atenção em estoque</h2>
-            <Link to="/admin/stock" className="text-sm text-muted-foreground hover:text-foreground">Gerenciar</Link>
-          </div>
-          {lowStock.length === 0 && out.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">Tudo certo por aqui ✨</p>
-          ) : (
-            <div className="space-y-2">
-              {out.map((p) => (
-                <div key={p.id} className="flex items-center justify-between rounded-lg p-2 hover:bg-muted/50">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-destructive" />
-                    <span className="text-sm">{p.name}</span>
-                  </div>
-                  <span className="text-xs font-medium text-destructive">Esgotado</span>
-                </div>
-              ))}
-              {lowStock.map((p) => (
-                <div key={p.id} className="flex items-center justify-between rounded-lg p-2 hover:bg-muted/50">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-warning" />
-                    <span className="text-sm">{p.name}</span>
-                  </div>
-                  <span className="text-xs font-medium text-warning">{p.stock} restantes</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+        <article className="bg-secondary p-6 text-secondary-foreground">
+          <div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase text-primary">Saúde do estoque</p><h2 className="mt-1 text-xl uppercase">Ação necessária</h2></div><Boxes className="h-6 w-6 text-primary" /></div>
+          <div className="my-8"><strong className="font-display text-6xl text-primary">{lowStock.length}</strong><p className="text-sm text-secondary-foreground/50">produtos abaixo do nível ideal</p></div>
+          <div className="space-y-2">{lowStock.slice(0, 4).map((product) => <div key={product.id} className="flex items-center gap-3 border border-secondary-foreground/10 p-3"><TriangleAlert className="h-4 w-4 text-warning" /><span className="min-w-0 flex-1 truncate text-sm">{product.name}</span><strong className="text-sm text-primary">{product.stock} un.</strong></div>)}</div>
+          <Link to="/admin/stock" className="mt-5 flex items-center justify-between border-t border-secondary-foreground/10 pt-5 text-sm font-bold">Gerenciar estoque <ArrowRight className="h-4 w-4" /></Link>
+        </article>
+      </section>
     </div>
   );
 }
