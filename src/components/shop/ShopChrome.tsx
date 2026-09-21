@@ -116,7 +116,7 @@ export function ShopHeader() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link to="/auth">
+            <Link to="/auth" search={{ redirect: "/" }}>
               <Button variant="ghost" size="sm">
                 Entrar
               </Button>
