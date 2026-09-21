@@ -138,12 +138,15 @@ function ProductsList() {
                   </span>
                 </td>
                 <td className="p-3 text-center">
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => update(p.id, { active: !p.active })}
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${p.active ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}
+                    className={`h-7 rounded-full px-2.5 text-xs font-medium ${p.active ? "bg-success/15 text-success hover:bg-success/20" : "bg-muted text-muted-foreground"}`}
                   >
                     {p.active ? "Ativo" : "Inativo"}
-                  </button>
+                  </Button>
                 </td>
                 <td className="p-3">
                   <div className="flex justify-end gap-1">

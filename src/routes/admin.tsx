@@ -63,7 +63,7 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 lg:block">{side}</aside>
-      {mobileOpen && <div className="fixed inset-0 z-50 lg:hidden"><button aria-label="Fechar menu" className="absolute inset-0 bg-secondary/80" onClick={() => setMobileOpen(false)} /><aside className="relative h-full w-72">{side}</aside></div>}
+      {mobileOpen && <div className="fixed inset-0 z-50 lg:hidden"><Button type="button" variant="ghost" aria-label="Fechar menu" className="absolute inset-0 h-full w-full rounded-none bg-secondary/80 p-0 hover:bg-secondary/80" onClick={() => setMobileOpen(false)} /><aside className="relative h-full w-72">{side}</aside></div>}
       <div className="lg:pl-64">
         <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur md:px-8">
           <Button variant="outline" size="icon" className="lg:hidden" onClick={() => setMobileOpen(true)}><Menu className="h-5 w-5" /></Button>
