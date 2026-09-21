@@ -38,8 +38,9 @@ export function ShopHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
+    <header className="sticky top-0 z-40 border-b border-secondary-foreground/10 bg-secondary text-secondary-foreground">
+      <div className="bg-primary py-1.5 text-center text-[11px] font-bold uppercase text-primary-foreground">Frete grátis acima de R$ 299 · 10% OFF na primeira compra</div>
+      <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4">
         <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="menu">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -55,18 +56,18 @@ export function ShopHeader() {
               {(settings.storeName || "B").slice(0, 1).toUpperCase()}
             </div>
           )}
-          <span className="hidden text-base font-semibold tracking-tight sm:inline">
+          <span className="hidden font-display text-base uppercase sm:inline">
             {settings.storeName || "Bertolleti Shop"}
           </span>
         </Link>
 
-        <form onSubmit={submit} className="relative ml-auto hidden flex-1 max-w-md md:block">
+        <form onSubmit={submit} className="relative ml-auto hidden flex-1 max-w-lg md:block">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Buscar produtos..."
-            className="pl-9"
+            className="h-10 border-secondary-foreground/20 bg-secondary-foreground/5 pl-9 text-secondary-foreground placeholder:text-secondary-foreground/45"
           />
         </form>
 
@@ -115,7 +116,7 @@ export function ShopHeader() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link to="/auth">
+            <Link to="/auth" search={{ redirect: "/" }}>
               <Button variant="ghost" size="sm">
                 Entrar
               </Button>
@@ -125,7 +126,7 @@ export function ShopHeader() {
       </div>
 
       {open && (
-        <div className="border-t p-4 md:hidden">
+        <div className="border-t border-secondary-foreground/10 p-4 md:hidden">
           <form onSubmit={submit} className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input

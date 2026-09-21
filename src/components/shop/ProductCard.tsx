@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useCart, useWishlist, useReviews } from "@/store";
 import { toast } from "sonner";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, dark = false }: { product: Product; dark?: boolean }) {
   const add = useCart((s) => s.add);
 
   // ✅ pega direto o array, sem lógica dentro
@@ -31,7 +31,7 @@ export function ProductCard({ product }: { product: Product }) {
   const out = product.stock <= 0;
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-xl border bg-card transition hover:shadow-elevated">
+    <article className={`group flex flex-col overflow-hidden border transition ${dark ? "border-secondary-foreground/10 bg-secondary text-secondary-foreground hover:border-primary/60" : "bg-card hover:shadow-elevated"}`}>
       <Link
         to="/product/$id"
         params={{ id: product.id }}
@@ -45,7 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
         />
 
         {hasPromo && !out && (
-          <span className="absolute left-3 top-3 rounded-full bg-foreground px-2 py-0.5 text-xs font-medium text-background">
+          <span className="absolute left-3 top-3 bg-primary px-2 py-1 text-xs font-bold text-primary-foreground">
             -{off}%
           </span>
         )}
@@ -67,7 +67,7 @@ export function ProductCard({ product }: { product: Product }) {
             );
           }}
           aria-label="Favoritar"
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-background/80 backdrop-blur transition hover:bg-background"
+          className="absolute right-3 top-3 grid h-9 w-9 place-items-center bg-background/90 backdrop-blur transition hover:bg-primary"
         >
           <Heart
             className={`h-4 w-4 ${
@@ -80,7 +80,7 @@ export function ProductCard({ product }: { product: Product }) {
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className={`flex items-center justify-between text-xs uppercase ${dark ? "text-secondary-foreground/55" : "text-muted-foreground"}`}>
           <span>{product.category}</span>
 
           {rating.count > 0 && (
@@ -97,7 +97,7 @@ export function ProductCard({ product }: { product: Product }) {
         <Link
           to="/product/$id"
           params={{ id: product.id }}
-          className="line-clamp-2 text-sm font-medium hover:underline"
+          className="line-clamp-2 min-h-12 font-display text-base uppercase leading-tight hover:text-primary"
         >
           {product.name}
         </Link>
@@ -109,14 +109,14 @@ export function ProductCard({ product }: { product: Product }) {
                 {brl(product.price)}
               </div>
             )}
-            <div className="text-base font-semibold">
+            <div className="text-xl font-bold">
               {brl(price)}
             </div>
           </div>
 
           <Button
             size="icon"
-            variant="secondary"
+            variant={dark ? "default" : "secondary"}
             disabled={out}
             onClick={() => {
               add(product.id, 1);
@@ -128,6 +128,6 @@ export function ProductCard({ product }: { product: Product }) {
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

@@ -21,6 +21,8 @@ import {
   useCategories,
   useOrders,
 } from "@/store";
+import { mockCoupons, mockProducts, mockReviews, mockSettings } from "@/lib/mock-data";
+import { DEFAULT_CATEGORIES } from "@/lib/categories";
 
 function NotFoundComponent() {
   return (
@@ -101,7 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/icone.jpg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Archivo+Black&family=Hind:wght@400;500;600;700&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -112,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
@@ -129,14 +131,13 @@ function RootComponent() {
   const initialized = useAuth((s) => s.initialized);
 
   useEffect(() => {
-    // Bootstrap: carrega dados do Supabase uma vez.
-    useAuth.getState().init();
-    useProducts.getState().load();
-    useCoupons.getState().load();
-    useReviews.getState().load();
-    useSettings.getState().load();
-    useCategories.getState().load();
-    useOrders.getState().load();
+    useAuth.setState({ initialized: true });
+    useProducts.setState({ products: mockProducts, loading: false });
+    useCoupons.setState({ coupons: mockCoupons, loading: false });
+    useReviews.setState({ reviews: mockReviews, loading: false });
+    useSettings.setState({ settings: mockSettings, loading: false });
+    useCategories.setState({ categories: DEFAULT_CATEGORIES, items: DEFAULT_CATEGORIES.map((name, position) => ({ id: `cat-${position}`, name, slug: name.toLowerCase(), position })), loading: false });
+    useOrders.setState({ loading: false });
   }, []);
 
   return (

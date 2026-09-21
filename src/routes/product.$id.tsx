@@ -183,7 +183,7 @@ function ReviewsSection({ productId }: { productId: string }) {
             <Button type="submit" size="sm">Publicar</Button>
           </form>
         ) : (
-          <p className="mt-3 text-sm text-muted-foreground"><Link to="/auth" className="underline">Entre</Link> para avaliar.</p>
+          <p className="mt-3 text-sm text-muted-foreground"><Link to="/auth" search={{ redirect: `/product/${productId}` }} className="underline">Entre</Link> para avaliar.</p>
         )}
       </div>
       <div className="space-y-3">
