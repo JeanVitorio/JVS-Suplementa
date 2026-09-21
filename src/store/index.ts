@@ -144,7 +144,7 @@ export const useAuth = create<AuthState>()(
     (set, get) => ({
       currentUser: null,
       loading: false,
-      initialized: true,
+      initialized: false,
       current: () => get().currentUser,
       isAdmin: () => get().currentUser?.role === "admin",
       init: async () => { set({ initialized: true }); },
