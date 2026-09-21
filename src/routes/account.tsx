@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/account")({
+  head: () => ({ meta: [
+    { title: "Minha conta | Bertolleti Performance" },
+    { name: "description", content: "Acompanhe seus pedidos e dados na Bertolleti Performance." },
+    { property: "og:title", content: "Minha conta | Bertolleti Performance" },
+    { property: "og:description", content: "Acompanhe pedidos e entregas da sua conta." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: AccountPage,
 });
 
