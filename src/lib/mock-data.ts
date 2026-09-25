@@ -43,7 +43,7 @@ export const mockSettings: Settings = {
   stripe_secret_key: "",
   shippingFlat: 19.9,
   freeShippingAbove: 299,
-  originCep: "",
+  originCep: "85501-000",
   deliveryDays: 14,
   whatsapp: "+55 46 99110-2704",
   email: "contato@bertolleti.com.br",
