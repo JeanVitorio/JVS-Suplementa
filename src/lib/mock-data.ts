@@ -65,7 +65,7 @@ export const mockUsers: User[] = [
     role: "client",
     phone: "+55 46 99922-4810",
     instagram: "@marina.fit",
-    address: { street: "Rua das Araucárias", number: "184", district: "Centro", city: "Pato Branco", state: "PR", cep: "85501-040" },
+    address: { street: "Rua das Araucárias", number: "184", district: "Centro", city: "Pato Branco", state: "PR", cep: "80020-140" },
     createdAt: "2026-01-18T14:30:00.000Z",
   },
   { id: "client-2", name: "Rafael Martins", email: "rafael@example.com", role: "client", phone: "+55 46 98870-1122", createdAt: "2026-02-03T09:20:00.000Z" },
