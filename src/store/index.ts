@@ -26,6 +26,10 @@ function mapProduct(row: any): Product {
     price: Number(row.price),
     promo_price: row.promo_price != null ? Number(row.promo_price) : null,
     stock: row.stock ?? 0,
+    weight: Number(row.weight ?? 1),
+    length: Number(row.length ?? 20),
+    height: Number(row.height ?? 10),
+    width: Number(row.width ?? 15),
     images: row.images ?? [],
     category: row.category ?? "",
     sku: row.sku ?? "",
@@ -102,6 +106,8 @@ function mapSettings(row: any): Settings {
     stripe_secret_key: row.stripe_secret_key ?? "",
     shippingFlat: Number(row.shipping_flat ?? 0),
     freeShippingAbove: Number(row.free_shipping_above ?? 0),
+    originCep: row.origin_cep ?? "",
+    deliveryDays: Number(row.delivery_days ?? 14),
     whatsapp: row.whatsapp ?? "",
     email: row.email ?? "",
   };
@@ -117,6 +123,8 @@ const DEFAULT_SETTINGS: Settings = {
   stripe_secret_key: "",
   shippingFlat: 0,
   freeShippingAbove: 0,
+  originCep: "",
+  deliveryDays: 14,
   whatsapp: "",
   email: "",
 };
@@ -212,6 +220,10 @@ function productPatchToDb(patch: Partial<Product>) {
   if (patch.price !== undefined) out.price = patch.price;
   if (patch.promo_price !== undefined) out.promo_price = patch.promo_price;
   if (patch.stock !== undefined) out.stock = patch.stock;
+  if (patch.weight !== undefined) out.weight = patch.weight;
+  if (patch.length !== undefined) out.length = patch.length;
+  if (patch.height !== undefined) out.height = patch.height;
+  if (patch.width !== undefined) out.width = patch.width;
   if (patch.images !== undefined) out.images = patch.images;
   if (patch.category !== undefined) out.category = patch.category;
   if (patch.sku !== undefined) out.sku = patch.sku;
@@ -461,6 +473,8 @@ function settingsPatchToDb(p: Partial<Settings>) {
   if (p.stripe_secret_key !== undefined) o.stripe_secret_key = p.stripe_secret_key;
   if (p.shippingFlat !== undefined) o.shipping_flat = p.shippingFlat;
   if (p.freeShippingAbove !== undefined) o.free_shipping_above = p.freeShippingAbove;
+  if (p.originCep !== undefined) o.origin_cep = p.originCep;
+  if (p.deliveryDays !== undefined) o.delivery_days = p.deliveryDays;
   if (p.whatsapp !== undefined) o.whatsapp = p.whatsapp;
   if (p.email !== undefined) o.email = p.email;
   return o;
@@ -557,6 +571,7 @@ export async function checkout(params: {
   address: Address;
   paymentMethod: PaymentMethod;
   couponCode?: string;
+  shipping?: number;
 }): Promise<{ ok: true; order: Order } | { ok: false; error: string }> {
   const cart = useCart.getState();
   const products = useProducts.getState();
@@ -599,7 +614,7 @@ export async function checkout(params: {
   const shipping =
     settings.freeShippingAbove > 0 && subtotal - discount >= settings.freeShippingAbove
       ? 0
-      : settings.shippingFlat;
+      : Math.max(0, params.shipping ?? settings.shippingFlat);
   const total = Math.max(0, subtotal - discount + shipping);
 
   for (const i of cart.items) {

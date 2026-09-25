@@ -19,6 +19,10 @@ export interface Product {
   price: number;
   promo_price?: number | null;
   stock: number;
+  weight: number;
+  length: number;
+  height: number;
+  width: number;
   images: string[];
   category: string;
   sku: string;
@@ -91,6 +95,8 @@ export interface Settings {
   stripe_secret_key: string;
   shippingFlat: number;
   freeShippingAbove: number;
+  originCep: string;
+  deliveryDays: number;
   whatsapp: string;
   email: string;
 }

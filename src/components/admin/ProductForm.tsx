@@ -24,6 +24,10 @@ export function ProductForm({
     price: initial?.price ?? 0,
     promo_price: initial?.promo_price ?? null,
     stock: initial?.stock ?? 0,
+    weight: initial?.weight ?? 1,
+    length: initial?.length ?? 20,
+    height: initial?.height ?? 10,
+    width: initial?.width ?? 15,
     images: initial?.images ?? [],
     category: initial?.category ?? categories[0] ?? "",
     sku: initial?.sku ?? "",
@@ -244,10 +248,49 @@ export function ProductForm({
           </label>
         </div>
 
+        <div className="rounded-xl border bg-card p-5">
+          <h2 className="mb-4 font-semibold">Frete</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <NumberField label="Peso (kg)" value={f.weight} min={0.01} step={0.01} onChange={(weight) => setF({ ...f, weight })} />
+            <NumberField label="Comprimento (cm)" value={f.length} min={16} onChange={(length) => setF({ ...f, length })} />
+            <NumberField label="Altura (cm)" value={f.height} min={2} onChange={(height) => setF({ ...f, height })} />
+            <NumberField label="Largura (cm)" value={f.width} min={11} onChange={(width) => setF({ ...f, width })} />
+          </div>
+        </div>
+
         <Button type="submit" className="w-full" size="lg">
           Salvar produto
         </Button>
       </aside>
     </form>
+  );
+}
+
+function NumberField({
+  label,
+  value,
+  min,
+  step = 1,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  step?: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <Input
+        required
+        type="number"
+        min={min}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="mt-1"
+      />
+    </div>
   );
 }

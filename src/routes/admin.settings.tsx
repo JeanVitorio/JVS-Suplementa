@@ -26,7 +26,12 @@ function SettingsPage() {
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
-    update(f);
+    const originCep = f.originCep.replace(/\D/g, "");
+    if (originCep && originCep.length !== 8) {
+      toast.error("Informe um CEP de origem válido.");
+      return;
+    }
+    update({ ...f, originCep });
     toast.success("Configurações salvas");
   };
 
@@ -167,6 +172,20 @@ function SettingsPage() {
 
       <Section title="Entrega">
         <div>
+          <Label>CEP de origem da loja</Label>
+          <Input
+            inputMode="numeric"
+            maxLength={9}
+            placeholder="00000-000"
+            value={f.originCep}
+            onChange={(e) => setF({ ...f, originCep: e.target.value })}
+            className="mt-1"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Usado como origem no cálculo de frete dos Correios.
+          </p>
+        </div>
+        <div>
           <Label>Frete fixo (R$)</Label>
           <Input
             type="number"
@@ -191,10 +210,8 @@ function SettingsPage() {
           <Input
             type="number"
             min="1"
-            value={(f as any).deliveryDays ?? 14}
-            onChange={(e) =>
-              setF({ ...f, ...({ deliveryDays: Number(e.target.value) } as any) })
-            }
+            value={f.deliveryDays}
+            onChange={(e) => setF({ ...f, deliveryDays: Number(e.target.value) })}
             className="mt-1 max-w-[200px]"
           />
           <p className="mt-1 text-xs text-muted-foreground">

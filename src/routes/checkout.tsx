@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ShopHeader, ShopFooter } from "@/components/shop/ShopChrome";
 import { useAuth, useCart, useProducts, useSettings, useCoupons, checkout } from "@/store";
 import { brl } from "@/lib/format";
@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { CreditCard, QrCode, Tag } from "lucide-react";
+import { CreditCard, Loader2, QrCode, Tag } from "lucide-react";
+import { calculateShipping } from "@/lib/api/shipping.functions";
 
 export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
@@ -21,30 +22,122 @@ function CheckoutPage() {
   const settings = useSettings((s) => s.settings);
   const [method, setMethod] = useState<"pix" | "card">("pix");
   const [submitting, setSubmitting] = useState(false);
+  const [calculatingShipping, setCalculatingShipping] = useState(false);
+  const [shippingQuote, setShippingQuote] = useState<{
+    price: number;
+    deliveryDays: number;
+    source: "correios" | "fallback";
+  } | null>(null);
 
   const [form, setForm] = useState({
     name: user?.name ?? "",
-    cep: "",
-    street: "",
-    number: "",
-    complement: "",
-    district: "",
-    city: "",
-    state: "",
-    phone: "",
+    cep: user?.address?.cep ?? "",
+    street: user?.address?.street ?? "",
+    number: user?.address?.number ?? "",
+    complement: user?.address?.complement ?? "",
+    district: user?.address?.district ?? "",
+    city: user?.address?.city ?? "",
+    state: user?.address?.state ?? "",
+    phone: user?.phone ?? user?.address?.phone ?? "",
   });
   const [card, setCard] = useState({ number: "", name: "", exp: "", cvv: "", installments: "1" });
-
-  if (!user) {
-    router.navigate({ to: "/auth", search: { redirect: "/checkout" } as never });
-    return null;
-  }
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const validateCoupon = useCoupons((s) => s.validate);
 
   const rows = items.map((i) => {
     const p = products.find((x) => x.id === i.productId)!;
     const price = p?.promo_price ?? p?.price ?? 0;
     return { ...i, product: p, price, lineTotal: price * i.quantity };
   }).filter(r => r.product);
+
+  const subtotal = rows.reduce((s, r) => s + r.lineTotal, 0);
+  const discount = appliedCoupon?.discount ?? 0;
+  const hasFreeShipping =
+    settings.freeShippingAbove > 0 && subtotal - discount >= settings.freeShippingAbove;
+  const shipping = hasFreeShipping ? 0 : (shippingQuote?.price ?? settings.shippingFlat);
+  const total = Math.max(0, subtotal - discount + shipping);
+
+  const requestShipping = async (showFeedback = true) => {
+    const originCep = settings.originCep.replace(/\D/g, "");
+    const destinationCep = form.cep.replace(/\D/g, "");
+    const fallback = {
+      price: settings.shippingFlat,
+      deliveryDays: settings.deliveryDays,
+      source: "fallback" as const,
+    };
+
+    if (originCep.length !== 8) {
+      setShippingQuote(fallback);
+      if (showFeedback) toast.error("O CEP de origem da loja ainda não foi configurado.");
+      return fallback;
+    }
+    if (destinationCep.length !== 8) {
+      setShippingQuote(fallback);
+      if (showFeedback) toast.error("Informe um CEP de destino válido.");
+      return fallback;
+    }
+
+    const weight = rows.reduce((sum, row) => sum + row.product.weight * row.quantity, 0);
+    const length = Math.max(16, ...rows.map((row) => row.product.length));
+    const width = Math.max(11, ...rows.map((row) => row.product.width));
+    const volume = rows.reduce(
+      (sum, row) =>
+        sum + row.product.length * row.product.height * row.product.width * row.quantity,
+      0,
+    );
+    const height = Math.max(
+      2,
+      ...rows.map((row) => row.product.height),
+      Math.ceil(volume / (length * width)),
+    );
+
+    setCalculatingShipping(true);
+    try {
+      const quote = await calculateShipping({
+        data: {
+          originCep,
+          destinationCep,
+          weight,
+          length,
+          height,
+          width,
+          fallbackPrice: settings.shippingFlat,
+          fallbackDeliveryDays: settings.deliveryDays,
+        },
+      });
+      setShippingQuote(quote);
+      if (showFeedback) {
+        if (quote.source === "fallback") {
+          toast.warning("Correios indisponível. Aplicamos o frete fixo de contingência.");
+        } else {
+          toast.success("Frete calculado pelos Correios.");
+        }
+      }
+      return quote;
+    } catch {
+      setShippingQuote(fallback);
+      if (showFeedback) {
+        toast.warning("Não foi possível calcular nos Correios. Aplicamos o frete fixo.");
+      }
+      return fallback;
+    } finally {
+      setCalculatingShipping(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.address?.cep && rows.length > 0 && !hasFreeShipping) {
+      void requestShipping(false);
+    }
+    // O cálculo automático deve ocorrer apenas ao carregar o endereço salvo do cliente.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!user) {
+    router.navigate({ to: "/auth", search: { redirect: "/checkout" } as never });
+    return null;
+  }
 
   if (rows.length === 0) {
     return (
@@ -57,14 +150,6 @@ function CheckoutPage() {
       </div>
     );
   }
-
-  const subtotal = rows.reduce((s, r) => s + r.lineTotal, 0);
-  const [couponInput, setCouponInput] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
-  const validateCoupon = useCoupons((s) => s.validate);
-  const discount = appliedCoupon?.discount ?? 0;
-  const shipping = subtotal - discount >= settings.freeShippingAbove ? 0 : settings.shippingFlat;
-  const total = Math.max(0, subtotal - discount + shipping);
 
   const applyCoupon = () => {
     const res = validateCoupon(couponInput, subtotal);
@@ -81,11 +166,15 @@ function CheckoutPage() {
       toast.error("Preencha os dados do cartão"); return;
     }
     setSubmitting(true);
+    const finalShipping = hasFreeShipping
+      ? { price: 0 }
+      : (shippingQuote ?? await requestShipping(false));
     await new Promise((r) => setTimeout(r, 800));
     const res = await checkout({
       userId: user.id, userEmail: user.email,
       address: { ...form }, paymentMethod: method,
       couponCode: appliedCoupon?.code,
+      shipping: finalShipping.price,
     });
     setSubmitting(false);
     if (!res.ok) { toast.error(res.error); return; }
@@ -104,7 +193,28 @@ function CheckoutPage() {
               <h2 className="mb-4 font-semibold">Endereço de entrega</h2>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label="Nome completo" v={form.name} onChange={(v) => setForm({ ...form, name: v })} className="sm:col-span-2" />
-                <Field label="CEP" v={form.cep} onChange={(v) => setForm({ ...form, cep: v })} />
+                <div>
+                  <Label>CEP</Label>
+                  <div className="mt-1 flex gap-2">
+                    <Input
+                      inputMode="numeric"
+                      maxLength={9}
+                      value={form.cep}
+                      onChange={(e) => {
+                        setForm({ ...form, cep: e.target.value });
+                        setShippingQuote(null);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={calculatingShipping || hasFreeShipping}
+                      onClick={() => void requestShipping()}
+                    >
+                      {calculatingShipping ? <Loader2 className="h-4 w-4 animate-spin" /> : "Calcular"}
+                    </Button>
+                  </div>
+                </div>
                 <Field label="Telefone" v={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
                 <Field label="Rua" v={form.street} onChange={(v) => setForm({ ...form, street: v })} className="sm:col-span-2" />
                 <Field label="Número" v={form.number} onChange={(v) => setForm({ ...form, number: v })} />
@@ -180,6 +290,12 @@ function CheckoutPage() {
               <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{brl(subtotal)}</span></div>
               {discount > 0 && <div className="flex justify-between text-success"><span>Desconto ({appliedCoupon?.code})</span><span>-{brl(discount)}</span></div>}
               <div className="flex justify-between"><span className="text-muted-foreground">Frete</span><span>{shipping === 0 ? "Grátis" : brl(shipping)}</span></div>
+              {shippingQuote && !hasFreeShipping && (
+                <div className="text-xs text-muted-foreground">
+                  Entrega em até {shippingQuote.deliveryDays} dias úteis
+                  {shippingQuote.source === "fallback" ? " (estimativa de contingência)" : " via PAC"}.
+                </div>
+              )}
               <div className="flex justify-between text-base font-semibold pt-1"><span>Total</span><span>{brl(total)}</span></div>
             </div>
             <Button className="mt-5 w-full" size="lg" disabled={submitting} onClick={submit}>
