@@ -42,7 +42,7 @@ function AdminLayout() {
       <div className="flex h-20 items-center justify-between border-b border-secondary-foreground/10 px-5">
         <Link to="/admin" className="flex items-center gap-3">
           <span className="grid h-10 w-10 place-items-center bg-primary font-display text-lg text-primary-foreground">B</span>
-          <span><strong className="block font-display text-sm uppercase">Bertolleti</strong><small className="block text-[10px] font-bold uppercase text-primary">Performance OS</small></span>
+          <span><strong className="block font-display text-sm uppercase">JVS</strong><small className="block text-[10px] font-bold uppercase text-primary">Modelo OS</small></span>
         </Link>
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(false)}><X className="h-5 w-5" /></Button>
       </div>

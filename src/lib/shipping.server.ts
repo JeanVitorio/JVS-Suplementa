@@ -1,4 +1,4 @@
-import Correios from "node-correios";
+import process from "node:process";
 
 export interface CorreiosPackage {
   originCep: string;
@@ -15,47 +15,71 @@ export interface CorreiosQuote {
   service: "PAC";
 }
 
-const PAC_SERVICE_CODE = "04510";
 const REQUEST_TIMEOUT_MS = 8_000;
+const SUPERFRETE_CALCULATOR_URL = "https://api.superfrete.com/api/v0/calculator";
 
-function parseCorreiosPrice(value: string) {
-  return Number(value.replace(/\./g, "").replace(",", "."));
+interface SuperFreteQuote {
+  id?: number;
+  name?: string;
+  price?: string | number;
+  delivery_time?: number;
+  delivery_range?: {
+    max?: number;
+  };
+  error?: string | Record<string, unknown>;
 }
 
 export async function calculateCorreiosQuote(pkg: CorreiosPackage): Promise<CorreiosQuote> {
-  const correios = new Correios();
-  const request = correios.calcPrecoPrazo({
-    nCdServico: PAC_SERVICE_CODE,
-    sCepOrigem: pkg.originCep,
-    sCepDestino: pkg.destinationCep,
-    nVlPeso: pkg.weight.toFixed(2),
-    nCdFormato: 1,
-    nVlComprimento: pkg.length,
-    nVlAltura: pkg.height,
-    nVlLargura: pkg.width,
-    nVlDiametro: 0,
-    sCdMaoPropria: "N",
-    nVlValorDeclarado: 0,
-    sCdAvisoRecebimento: "N",
+  const token = process.env.SUPERFRETE_TOKEN?.trim();
+  if (!token) {
+    throw new Error("SUPERFRETE_TOKEN não configurado no servidor.");
+  }
+
+  const response = await fetch(SUPERFRETE_CALCULATOR_URL, {
+    method: "POST",
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "User-Agent":
+        process.env.SUPERFRETE_USER_AGENT?.trim() ||
+        "JVS Modelo (contato@jvsmodelo.com.br)",
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: { postal_code: pkg.originCep },
+      to: { postal_code: pkg.destinationCep },
+      services: "1",
+      options: {
+        own_hand: false,
+        receipt: false,
+        insurance_value: 0,
+        use_insurance_value: false,
+      },
+      package: {
+        height: pkg.height,
+        width: pkg.width,
+        length: pkg.length,
+        weight: pkg.weight,
+      },
+    }),
   });
 
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(
-      () => reject(new Error("Tempo limite excedido na consulta aos Correios.")),
-      REQUEST_TIMEOUT_MS,
-    );
-  });
-  const [result] = await Promise.race([request, timeout]).finally(() => {
-    if (timeoutId) clearTimeout(timeoutId);
-  });
-  const errorCode = typeof result?.Erro === "string" ? result.Erro : "0";
-  const price = result ? parseCorreiosPrice(result.Valor) : Number.NaN;
-  const deliveryDays = Number(result?.PrazoEntrega);
+  if (!response.ok) {
+    throw new Error(`SuperFrete respondeu com status ${response.status}.`);
+  }
 
-  if (!result || (errorCode !== "" && errorCode !== "0") || !Number.isFinite(price) || price <= 0) {
-    const message = typeof result?.MsgErro === "string" ? result.MsgErro : "Consulta de frete indisponível.";
-    throw new Error(message);
+  const quotes = (await response.json()) as SuperFreteQuote[];
+  const pac = quotes.find(
+    (quote) =>
+      !quote.error &&
+      (quote.id === 1 || quote.name?.trim().toUpperCase() === "PAC"),
+  );
+  const price = Number(pac?.price);
+  const deliveryDays = Number(pac?.delivery_time ?? pac?.delivery_range?.max);
+
+  if (!pac || !Number.isFinite(price) || price <= 0) {
+    throw new Error("A SuperFrete não retornou uma cotação PAC válida.");
   }
 
   return {

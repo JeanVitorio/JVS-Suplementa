@@ -63,7 +63,7 @@ Vou aplicar em uma sequência grande de edits (auth → store → checkout → a
 
 ## Perguntas rápidas antes de começar
 
-1. **Senha do admin atual** (`admin@bertolleti.com / admin123`) — esse usuário não existe no Supabase. Quer que eu crie uma tela/instrução pra você cadastrar o primeiro admin, ou você já tem um user no Supabase que devo marcar como admin?
+1. **Senha do admin atual** (`admin@jvsmodelo.com.br / admin123`) — esse usuário não existe no Supabase. Quer que eu crie uma tela/instrução pra você cadastrar o primeiro admin, ou você já tem um user no Supabase que devo marcar como admin?
 2. Posso assumir que **as RLS policies e o trigger de `profiles` já estão criados** no seu projeto Supabase? (Se não, eu gero a migration no caminho.)
 
 Confirma o plano (ou ajusta) que eu sigo.

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Bertolleti Shop — MIGRAÇÃO 002 (novas telas / funcionalidades)
+-- JVS Modelo — MIGRAÇÃO 002 (novas telas / funcionalidades)
 -- ----------------------------------------------------------------------------
 -- Pré-requisito: schema.sql (migração 001) já aplicado.
 -- Execute este arquivo no SQL Editor do Supabase.

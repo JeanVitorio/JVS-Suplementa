@@ -4,7 +4,7 @@ import { Leaf, Sparkles, ShieldCheck, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/about")({
   head: () => ({ meta: [
-    { title: "Sobre — Bertolleti Shop" },
+    { title: "Sobre — JVS Modelo" },
     { name: "description", content: "Curadoria premium em produtos para uma vida com mais design." },
   ], links: [{ rel: "canonical", href: "/about" }] }),
   component: AboutPage,
@@ -18,7 +18,7 @@ function AboutPage() {
         <section className="border-b bg-gradient-to-b from-muted/40 to-background">
           <div className="mx-auto max-w-4xl px-4 py-20 text-center">
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl">Design que fica.</h1>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">A Bertolleti Shop nasceu para reunir peças bem feitas, com propósito e estética atemporal. Cada produto é selecionado por durabilidade, função real e beleza.</p>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">A JVS Modelo nasceu para reunir peças bem feitas, com propósito e estética atemporal. Cada produto é selecionado por durabilidade, função real e beleza.</p>
           </div>
         </section>
         <section className="mx-auto grid max-w-6xl gap-6 px-4 py-16 md:grid-cols-4">

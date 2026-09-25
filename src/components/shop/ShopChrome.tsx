@@ -57,7 +57,7 @@ export function ShopHeader() {
             </div>
           )}
           <span className="hidden font-display text-base uppercase sm:inline">
-            {settings.storeName || "Bertolleti Shop"}
+            {settings.storeName || "JVS Modelo"}
           </span>
         </Link>
 
@@ -161,7 +161,7 @@ export function ShopFooter() {
                 {(settings.storeName || "B").slice(0, 1).toUpperCase()}
               </div>
             )}
-            <span className="font-semibold">{settings.storeName || "Bertolleti Shop"}</span>
+            <span className="font-semibold">{settings.storeName || "JVS Modelo"}</span>
           </div>
           <p className="text-sm text-muted-foreground">
             {settings.storeDescription ||
@@ -209,7 +209,7 @@ export function ShopFooter() {
         </div>
       </div>
       <div className="border-t py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} {settings.storeName || "Bertolleti Shop"}. Todos os direitos
+        © {new Date().getFullYear()} {settings.storeName || "JVS Modelo"}. Todos os direitos
         reservados.
       </div>
     </footer>

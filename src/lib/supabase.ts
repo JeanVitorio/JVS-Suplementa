@@ -37,5 +37,5 @@ export const supabase: SupabaseClient | null = supabaseEnabled
 
 if (!supabaseEnabled && typeof window !== "undefined") {
   // Apenas um aviso — o app funciona em modo mock sem Supabase.
-  console.info("[Bertolleti Shop] Supabase não configurado — rodando em modo mock (localStorage).");
+  console.info("[JVS Modelo] Supabase não configurado — rodando em modo mock (localStorage).");
 }

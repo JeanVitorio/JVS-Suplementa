@@ -1,5 +1,5 @@
 -- =====================================================================
---  Bertolleti Shop — Atualização do banco (v4)
+--  JVS Modelo — Atualização do banco (v4)
 --  Rode no Supabase SQL Editor. Idempotente — pode rodar várias vezes.
 --  Prepara o schema para: edição de produtos, perfil completo do cliente,
 --  upload de logo, integração Stripe real, carrinhos abandonados,

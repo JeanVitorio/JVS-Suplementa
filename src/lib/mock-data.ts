@@ -34,11 +34,11 @@ export const mockCoupons: Coupon[] = [
 ];
 
 export const mockSettings: Settings = {
-  storeName: "Bertolleti Performance",
+  storeName: "JVS Modelo",
   storeDescription: "Suplementação selecionada para quem leva evolução a sério.",
   logoUrl: "",
-  pix_key: "demo@bertolleti.com.br",
-  pix_holder: "Bertolleti Performance",
+  pix_key: "demo@jvsmodelo.com.br",
+  pix_holder: "JVS Modelo",
   stripe_public_key: "",
   stripe_secret_key: "",
   shippingFlat: 19.9,
@@ -46,14 +46,14 @@ export const mockSettings: Settings = {
   originCep: "85501-000",
   deliveryDays: 14,
   whatsapp: "+55 46 99110-2704",
-  email: "contato@bertolleti.com.br",
+  email: "contato@jvsmodelo.com.br",
 };
 
 export const mockUsers: User[] = [
   {
     id: "admin-demo",
-    name: "Bruno Bertolleti",
-    email: "admin@bertolleti.com.br",
+    name: "Administrador JVS",
+    email: "admin@jvsmodelo.com.br",
     role: "admin",
     phone: "+55 46 99110-2704",
     createdAt: "2025-08-12T10:00:00.000Z",
@@ -61,7 +61,7 @@ export const mockUsers: User[] = [
   {
     id: "client-demo",
     name: "Marina Souza",
-    email: "cliente@bertolleti.com.br",
+    email: "cliente@jvsmodelo.com.br",
     role: "client",
     phone: "+55 46 99922-4810",
     instagram: "@marina.fit",
@@ -74,21 +74,21 @@ export const mockUsers: User[] = [
 
 export const mockOrders: Order[] = [
   {
-    id: "BP-260921-1048", userId: "client-demo", userEmail: "cliente@bertolleti.com.br",
+    id: "JVS-260921-1048", userId: "client-demo", userEmail: "cliente@jvsmodelo.com.br",
     items: [{ id: "item-1", productId: "whey-isolate", name: "Whey Isolate Black 900g", quantity: 1, price: 189.9, image: wheyImage }],
     subtotal: 189.9, shipping: 19.9, total: 209.8, status: "enviado", paymentMethod: "pix",
     trackingCode: "BR459102837BP", address: { name: "Marina Souza", cep: "85501-040", street: "Rua das Araucárias", number: "184", district: "Centro", city: "Pato Branco", state: "PR", phone: "+55 46 99922-4810" },
     createdAt: "2026-09-19T15:22:00.000Z",
   },
   {
-    id: "BP-260921-1026", userId: "client-2", userEmail: "rafael@example.com",
+    id: "JVS-260921-1026", userId: "client-2", userEmail: "rafael@example.com",
     items: [{ id: "item-2", productId: "creatine-pure", name: "Creatina Pure 300g", quantity: 2, price: 109.9, image: creatineImage }],
     subtotal: 219.8, shipping: 19.9, total: 239.7, status: "preparando", paymentMethod: "card",
     address: { name: "Rafael Martins", cep: "85504-120", street: "Avenida Brasil", number: "920", district: "La Salle", city: "Pato Branco", state: "PR", phone: "+55 46 98870-1122" },
     createdAt: "2026-09-21T12:48:00.000Z",
   },
   {
-    id: "BP-260921-1019", userId: "client-3", userEmail: "camila@example.com",
+    id: "JVS-260921-1019", userId: "client-3", userEmail: "camila@example.com",
     items: [{ id: "item-3", productId: "pre-charge", name: "Pré-Treino Charge 300g", quantity: 1, price: 99.9, image: preworkoutImage }, { id: "item-4", productId: "multi-daily", name: "Multivitamínico Daily 90 caps", quantity: 1, price: 64.9, image: vitaminImage }],
     subtotal: 164.8, shipping: 19.9, total: 184.7, status: "pago", paymentMethod: "pix",
     address: { name: "Camila Rocha", cep: "85503-330", street: "Rua Tocantins", number: "410", district: "Baixada", city: "Pato Branco", state: "PR", phone: "+55 46 99714-3051" },
@@ -97,6 +97,6 @@ export const mockOrders: Order[] = [
 ];
 
 export const MOCK_CREDENTIALS = {
-  admin: { email: "admin@bertolleti.com.br", password: "admin123" },
-  client: { email: "cliente@bertolleti.com.br", password: "cliente123" },
+  admin: { email: "admin@jvsmodelo.com.br", password: "admin123" },
+  client: { email: "cliente@jvsmodelo.com.br", password: "cliente123" },
 } as const;

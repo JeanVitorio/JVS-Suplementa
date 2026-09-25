@@ -14,9 +14,9 @@ import preworkoutImage from "@/assets/preworkout-product.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Bertolleti Performance — Suplementação para ir além" },
+      { title: "JVS Modelo — Suplementação para ir além" },
       { name: "description", content: "Suplementos selecionados para força, performance e recuperação. Whey, creatina, pré-treino e vitaminas." },
-      { property: "og:title", content: "Bertolleti Performance" },
+      { property: "og:title", content: "JVS Modelo" },
       { property: "og:description", content: "Suplementação selecionada para quem leva evolução a sério." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

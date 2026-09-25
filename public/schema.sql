@@ -1,5 +1,5 @@
 -- ============================================================================
--- Bertolleti Shop — Database schema (PostgreSQL / Supabase)
+-- JVS Modelo — Database schema (PostgreSQL / Supabase)
 -- ============================================================================
 -- Execute este arquivo no SQL Editor do seu projeto Supabase.
 -- Gera enums, tabelas, índices, triggers, funções, RLS e storage.
@@ -40,7 +40,7 @@ $$;
 -- Settings (singleton) ----------------------------------------------------
 create table public.settings (
   id uuid primary key default gen_random_uuid(),
-  store_name text not null default 'Bertolleti Shop',
+  store_name text not null default 'JVS Modelo',
   store_description text,
   pix_key text,
   pix_holder text,
@@ -246,6 +246,6 @@ create policy "product_images_admin_write" on storage.objects for all
 
 -- SEED --------------------------------------------------------------------
 insert into public.settings (store_name, store_description, pix_key, pix_holder, shipping_flat, free_shipping_above)
-values ('Bertolleti Shop', 'Curadoria premium em produtos para uma vida com mais design.',
-        'contato@bertolleti.com', 'Bertolleti Comércio LTDA', 24.90, 299.00)
+values ('JVS Modelo', 'Curadoria premium em produtos para uma vida com mais design.',
+        'contato@jvsmodelo.com.br', 'JVS Modelo', 24.90, 299.00)
 on conflict do nothing;

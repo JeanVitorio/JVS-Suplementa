@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [
-    { title: "Central de comando | Bertolleti Performance" },
-    { name: "description", content: "Visão operacional da loja Bertolleti Performance." },
-    { property: "og:title", content: "Central de comando | Bertolleti Performance" },
+    { title: "Central de comando | JVS Modelo" },
+    { name: "description", content: "Visão operacional da loja JVS Modelo." },
+    { property: "og:title", content: "Central de comando | JVS Modelo" },
     { property: "og:description", content: "Indicadores, pedidos e estoque em uma visão operacional." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },

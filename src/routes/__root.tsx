@@ -90,9 +90,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Bertolleti Shop — Curadoria premium" },
+      { title: "JVS Modelo — Curadoria premium" },
       { name: "description", content: "Loja online com curadoria premium em tecnologia, casa, moda e acessórios." },
-      { property: "og:title", content: "Bertolleti Shop" },
+      { property: "og:title", content: "JVS Modelo" },
       { property: "og:description", content: "Curadoria premium em produtos para uma vida com mais design." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

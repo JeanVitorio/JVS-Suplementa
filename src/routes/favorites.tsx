@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/favorites")({
   head: () => ({
     meta: [
-      { title: "Favoritos — Bertolleti Shop" },
+      { title: "Favoritos — JVS Modelo" },
       { name: "description", content: "Seus produtos favoritos." },
     ],
     links: [{ rel: "canonical", href: "/favorites" }],

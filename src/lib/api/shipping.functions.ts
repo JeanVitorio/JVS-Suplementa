@@ -18,7 +18,7 @@ export const calculateShipping = createServerFn({ method: "POST" })
     try {
       const { calculateCorreiosQuote } = await import("../shipping.server");
       const quote = await calculateCorreiosQuote(data);
-      return { ...quote, source: "correios" as const };
+      return { ...quote, source: "superfrete" as const };
     } catch (error) {
       console.error("Falha ao consultar frete nos Correios; usando contingência.", error);
       return {

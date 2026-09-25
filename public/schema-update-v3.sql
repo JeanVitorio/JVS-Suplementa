@@ -1,5 +1,5 @@
 -- =====================================================================
---  Bertolleti Shop — Atualização do banco (v3)
+--  JVS Modelo — Atualização do banco (v3)
 --  Rodar no Supabase SQL Editor (idempotente)
 -- =====================================================================
 

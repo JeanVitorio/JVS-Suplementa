@@ -183,7 +183,7 @@ export const useAuth = create<AuthState>()(
       },
       logout: async () => { set({ currentUser: null }); },
     }),
-    { name: "bertolleti-demo-auth", partialize: (state) => ({ currentUser: state.currentUser }) },
+    { name: "jvs-modelo-demo-auth", partialize: (state) => ({ currentUser: state.currentUser }) },
   ),
 );
 
@@ -302,7 +302,7 @@ export const useCart = create<CartState>()(
       clear: () => set({ items: [] }),
       count: () => get().items.reduce((s, i) => s + i.quantity, 0),
     }),
-    { name: "bsh-cart" },
+    { name: "jvs-modelo-cart" },
   ),
 );
 
@@ -622,7 +622,7 @@ export async function checkout(params: {
     if (cur) await products.setStock(i.productId, Math.max(0, cur.stock - i.quantity));
   }
   const order: Order = {
-    id: `BP-${Date.now()}`,
+    id: `JVS-${Date.now()}`,
     userId: params.userId,
     userEmail: params.userEmail,
     items: lineItems,
@@ -634,7 +634,7 @@ export async function checkout(params: {
     status: params.paymentMethod === "pix" ? "aguardando_pagamento" : "pago",
     paymentMethod: params.paymentMethod,
     address: params.address,
-    pixCode: params.paymentMethod === "pix" ? `00020126BERTOLLETI${Date.now()}` : undefined,
+    pixCode: params.paymentMethod === "pix" ? `00020126JVSMODELO${Date.now()}` : undefined,
     createdAt: new Date().toISOString(),
   };
   useOrders.setState((s) => ({ orders: [order, ...s.orders] }));

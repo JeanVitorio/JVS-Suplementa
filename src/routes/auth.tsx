@@ -11,9 +11,9 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({ redirect: typeof search.redirect === "string" ? search.redirect : "/" }),
   head: () => ({ meta: [
-    { title: "Acessar conta | Bertolleti Performance" },
-    { name: "description", content: "Acesse a demonstração da loja ou do painel Bertolleti Performance." },
-    { property: "og:title", content: "Acessar conta | Bertolleti Performance" },
+    { title: "Acessar conta | JVS Modelo" },
+    { name: "description", content: "Acesse a demonstração da loja ou do painel JVS Modelo." },
+    { property: "og:title", content: "Acessar conta | JVS Modelo" },
     { property: "og:description", content: "Entrada segura para clientes e administração da loja." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
@@ -54,7 +54,7 @@ function AuthPage() {
           <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
           <Link to="/" className="relative flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center bg-primary font-display text-xl text-primary-foreground">B</span>
-            <span className="font-display text-lg uppercase">Bertolleti Performance</span>
+            <span className="font-display text-lg uppercase">JVS Modelo</span>
           </Link>
 
           <div className="relative max-w-xl">
@@ -76,7 +76,7 @@ function AuthPage() {
           <div className="w-full max-w-md">
             <Link to="/" className="mb-10 flex items-center gap-3 lg:hidden">
               <span className="grid h-10 w-10 place-items-center bg-secondary font-display text-lg text-primary">B</span>
-              <span className="font-display text-sm uppercase">Bertolleti Performance</span>
+              <span className="font-display text-sm uppercase">JVS Modelo</span>
             </Link>
             <div className="mb-8">
               <span className="text-xs font-bold uppercase text-muted-foreground">Acesso exclusivo</span>

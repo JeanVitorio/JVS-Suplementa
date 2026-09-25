@@ -10,9 +10,9 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({ meta: [
-    { title: "Contato — Bertolleti Shop" },
-    { name: "description", content: "Fale com a Bertolleti Shop: dúvidas, pedidos e suporte." },
-    { property: "og:title", content: "Contato — Bertolleti Shop" },
+    { title: "Contato — JVS Modelo" },
+    { name: "description", content: "Fale com a JVS Modelo: dúvidas, pedidos e suporte." },
+    { property: "og:title", content: "Contato — JVS Modelo" },
   ], links: [{ rel: "canonical", href: "/contact" }] }),
   component: ContactPage,
 });

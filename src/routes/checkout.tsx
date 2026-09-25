@@ -26,7 +26,7 @@ function CheckoutPage() {
   const [shippingQuote, setShippingQuote] = useState<{
     price: number;
     deliveryDays: number;
-    source: "correios" | "fallback";
+    source: "superfrete" | "fallback";
   } | null>(null);
 
   const [form, setForm] = useState({
