@@ -39,12 +39,12 @@ export function ShopHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-secondary-foreground/10 bg-secondary text-secondary-foreground">
-      <div className="bg-primary py-1.5 text-center text-[11px] font-bold uppercase text-primary-foreground">Frete grátis acima de R$ 299 · 10% OFF na primeira compra</div>
-      <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4">
-        <button className="md:hidden" onClick={() => setOpen(!open)} aria-label="menu">
+      <div className="bg-primary px-2 py-1.5 text-center text-[10px] font-bold uppercase leading-tight text-primary-foreground sm:text-[11px]">Frete grátis acima de R$ 299 · 10% OFF na primeira compra</div>
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:h-18 sm:gap-4 sm:px-4">
+        <button className="grid h-10 w-10 shrink-0 place-items-center md:hidden" onClick={() => setOpen(!open)} aria-label="menu">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex min-w-0 items-center gap-2">
           {settings.logoUrl ? (
             <img
               src={settings.logoUrl}
@@ -56,7 +56,7 @@ export function ShopHeader() {
               {(settings.storeName || "B").slice(0, 1).toUpperCase()}
             </div>
           )}
-          <span className="hidden font-display text-base uppercase sm:inline">
+          <span className="hidden max-w-40 truncate font-display text-base uppercase sm:inline">
             {settings.storeName || "JVS Modelo"}
           </span>
         </Link>
@@ -71,7 +71,7 @@ export function ShopHeader() {
           />
         </form>
 
-        <div className="ml-auto flex items-center gap-1 md:ml-0">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1 md:ml-0">
           <Link to="/favorites" className="hidden sm:inline-flex">
             <Button variant="ghost" size="icon" aria-label="Favoritos">
               <Heart className="h-5 w-5" />
@@ -126,7 +126,7 @@ export function ShopHeader() {
       </div>
 
       {open && (
-        <div className="border-t border-secondary-foreground/10 p-4 md:hidden">
+        <div className="border-t border-secondary-foreground/10 p-3 sm:p-4 md:hidden">
           <form onSubmit={submit} className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input

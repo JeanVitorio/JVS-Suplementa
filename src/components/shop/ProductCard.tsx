@@ -67,7 +67,7 @@ export function ProductCard({ product, dark = false }: { product: Product; dark?
             );
           }}
           aria-label="Favoritar"
-          className="absolute right-3 top-3 grid h-9 w-9 place-items-center bg-background/90 backdrop-blur transition hover:bg-primary"
+          className="absolute right-2 top-2 grid h-9 w-9 place-items-center bg-background/90 backdrop-blur transition hover:bg-primary sm:right-3 sm:top-3"
         >
           <Heart
             className={`h-4 w-4 ${
@@ -79,12 +79,12 @@ export function ProductCard({ product, dark = false }: { product: Product; dark?
         </button>
       </Link>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className={`flex items-center justify-between text-xs uppercase ${dark ? "text-secondary-foreground/55" : "text-muted-foreground"}`}>
-          <span>{product.category}</span>
+      <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+        <div className={`flex min-w-0 items-center justify-between gap-1 text-[11px] uppercase sm:text-xs ${dark ? "text-secondary-foreground/55" : "text-muted-foreground"}`}>
+          <span className="truncate">{product.category}</span>
 
           {rating.count > 0 && (
-            <span className="flex items-center gap-1">
+            <span className="flex shrink-0 items-center gap-1">
               <Star className="h-3 w-3 fill-warning text-warning" />
               {rating.score.toFixed(1)}
               <span className="opacity-60">
@@ -102,14 +102,14 @@ export function ProductCard({ product, dark = false }: { product: Product; dark?
           {product.name}
         </Link>
 
-        <div className="mt-auto flex items-end justify-between pt-2">
-          <div>
+        <div className="mt-auto flex min-w-0 items-end justify-between gap-2 pt-2">
+          <div className="min-w-0">
             {hasPromo && (
               <div className="text-xs text-muted-foreground line-through">
                 {brl(product.price)}
               </div>
             )}
-            <div className="text-xl font-bold">
+            <div className="truncate text-lg font-bold sm:text-xl">
               {brl(price)}
             </div>
           </div>
@@ -117,6 +117,7 @@ export function ProductCard({ product, dark = false }: { product: Product; dark?
           <Button
             size="icon"
             variant={dark ? "default" : "secondary"}
+            className="h-9 w-9 shrink-0 sm:h-10 sm:w-10"
             disabled={out}
             onClick={() => {
               add(product.id, 1);
